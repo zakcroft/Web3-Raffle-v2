@@ -1,0 +1,10 @@
+{
+  "plugins": ["prettier-plugin-solidity", "@trivago/prettier-plugin-sort-imports"],
+  "trailingComma": "all",
+  "singleQuote": true,
+  "useTabs": false,
+  "importOrder": ["@nomic*", "^[@]", "hardhat*", "<THIRD_PARTY_MODULES>", "scripts", "^[./]"],
+  "importOrderSeparation": true,
+  "importOrderSortSpecifiers": true,
+  "importOrderGroupNamespaceSpecifiers": true
+}
