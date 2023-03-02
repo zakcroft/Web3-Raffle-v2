@@ -40,9 +40,9 @@ const deployRaffle: DeployFunction = async function (
   log('----------------------------------------------------');
   log('Deploying Raffle and waiting for confirmations...');
 
-  const { entranceFee, gasLane, callbackGasLimit, keepersUpdateInterval } =
+  const { tokenCost, gasLane, callbackGasLimit, keepersUpdateInterval } =
     networkConfig[chainId as number] || {};
-  console.log('entranceFee', entranceFee?.toString());
+  console.log('entranceFee', tokenCost?.toString());
   const _MAX_COINS = 1000000;
   const _INIT_SALES_ALLOCATION = 1000;
 
@@ -62,7 +62,7 @@ const deployRaffle: DeployFunction = async function (
     raffleTokenDeployObject.address,
     vrfCoordinatorV2Address,
     subscriptionId,
-    entranceFee,
+    tokenCost,
     gasLane,
     callbackGasLimit,
     keepersUpdateInterval,

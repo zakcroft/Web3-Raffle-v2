@@ -43,7 +43,7 @@ contract Raffle is
     using SafeMath for uint256;
 
     /* State vars */
-    uint256 private immutable i_entranceFee;
+    uint256 private immutable i_tokenCost;
 
     struct Player {
         address addr;
@@ -74,7 +74,7 @@ contract Raffle is
         address tokenAddress,
         address vrfCoordinatorV2,
         uint64 subscriptionId,
-        uint256 entranceFee,
+        uint256 tokenCost,
         bytes32 gasLane,
         uint32 callbackGasLimit,
         uint256 keepersUpdateInterval
@@ -83,7 +83,7 @@ contract Raffle is
         s_owner = msg.sender;
         i_vrfCoordinator = VRFCoordinatorV2Interface(vrfCoordinatorV2);
         i_subscriptionId = subscriptionId;
-        i_entranceFee = entranceFee;
+        i_tokenCost = tokenCost;
         i_gasLane = gasLane;
         i_callbackGasLimit = callbackGasLimit;
         s_raffleState = RAFFLE_STATE.OPEN;
@@ -140,33 +140,41 @@ contract Raffle is
 
         // 1 ether == 1e9 gwei — 1,000,000,000
 
-        // Cost per token =  1e6 gwei - 1,000,000 gwei = 1e15 wei == 1e-6 ether - 0.001 ether = ~£1.36
+        // Cost per token =  1e6 gwei = 1e15 wei == 1e-3 ether - 0.001 ether = ~£1.36
 
-        uint256 tokenCost = 1e6 gwei;
+                     // 10000000000000000
+                     // 1000000000000000
+        // entrance fee 1000000000000000
+        //uint256 tokenCost = 1e15 wei;
         // buy 1 or more tokens
-        if(msg.value < tokenCost){
+        if(msg.value < i_tokenCost){
             revert Raffle__SendMoreToEnterRaffle();
         }
 
-        uint256 amountToBuy = msg.value.div(tokenCost);
+        uint256 amountToBuy = msg.value.div(i_tokenCost);
 
-        console.log('amountToBuy',amountToBuy);
+//        console.log('msg.value',msg.value);
+//        console.log('amountToBuy',amountToBuy);
+//        console.log('amountToBuy.mod(1)', amountToBuy.mod(i_tokenCost));
 
         // Make sure we are buying whole tokens
-        if(amountToBuy.mod(1) == 0){
+        if(amountToBuy.mod(i_tokenCost) == 0){
             revert Raffle__CannotBuyPartialTokens();
         }
 
-        // check there is enough tokens available
-        if(token.balanceOf(address(this)) >= amountToBuy)   {
+        //console.log('token.balanceOf(address(this))',token.balanceOf(address(this)));
+        // Check there is enough tokens available
+        if(token.balanceOf(address(this)) <= amountToBuy)   {
             revert Raffle__RaffleDoesNotHaveEnoughTokens();
         }
 
+        //console.log(msg.sender, amountToBuy, msg.value);
         // Contract A calls Contract B
         // _transfer(RaffleContract, account[1], amountToBuy);
         // msg.sender is different from msg.sender in the erc20 as its the raffleContract in erc20
         bool sent = token.transfer(msg.sender, amountToBuy);
-        if(sent){
+        //console.log(sent);
+        if(!sent){
             revert Raffle__TransferFailed();
         }
 
@@ -300,8 +308,8 @@ contract Raffle is
     }
 
     // pure and views getters
-    function getEntranceFee() public view returns (uint256) {
-        return i_entranceFee;
+    function getTokenCost() public view returns (uint256) {
+        return i_tokenCost;
     }
 
     function getPlayer(uint256 i) public view returns (address) {
