@@ -133,7 +133,6 @@ contract Raffle is
         raffleIsOpen
         returns (uint256 tokenAmount)
     {
-
         // 1 ether == 1e18 wei — 1,000,000,000,000,000,000 wei
 
         // 1 gwei (shannon) == 1e9 wei — 1,000,000,000
@@ -142,10 +141,6 @@ contract Raffle is
 
         // Cost per token =  1e6 gwei = 1e15 wei == 1e-3 ether - 0.001 ether = ~£1.36
 
-                     // 10000000000000000
-                     // 1000000000000000
-        // entrance fee 1000000000000000
-        //uint256 tokenCost = 1e15 wei;
         // buy 1 or more tokens
         if(msg.value < i_tokenCost){
             revert Raffle__SendMoreToEnterRaffle();
@@ -153,27 +148,21 @@ contract Raffle is
 
         uint256 amountToBuy = msg.value.div(i_tokenCost);
 
-//        console.log('msg.value',msg.value);
-//        console.log('amountToBuy',amountToBuy);
-//        console.log('amountToBuy.mod(1)', amountToBuy.mod(i_tokenCost));
-
         // Make sure we are buying whole tokens
         if(amountToBuy.mod(i_tokenCost) == 0){
             revert Raffle__CannotBuyPartialTokens();
         }
 
-        //console.log('token.balanceOf(address(this))',token.balanceOf(address(this)));
         // Check there is enough tokens available
         if(token.balanceOf(address(this)) <= amountToBuy)   {
             revert Raffle__RaffleDoesNotHaveEnoughTokens();
         }
 
-        //console.log(msg.sender, amountToBuy, msg.value);
         // Contract A calls Contract B
         // _transfer(RaffleContract, account[1], amountToBuy);
         // msg.sender is different from msg.sender in the erc20 as its the raffleContract in erc20
         bool sent = token.transfer(msg.sender, amountToBuy);
-        //console.log(sent);
+
         if(!sent){
             revert Raffle__TransferFailed();
         }
