@@ -3,8 +3,10 @@
 pragma solidity >=0.4.22 <0.9.0;
 
 import '@openzeppelin/contracts/access/Ownable.sol';
+import '@openzeppelin/contracts/utils/math/SafeMath.sol';
 import '@chainlink/contracts/src/v0.8/interfaces/VRFCoordinatorV2Interface.sol';
 import '@chainlink/contracts/src/v0.8/VRFConsumerBaseV2.sol';
+import '@chainlink/contracts/src/v0.8/KeeperCompatible.sol';
 import '@chainlink/contracts/src/v0.8/KeeperCompatible.sol';
 import 'hardhat/console.sol';
 
@@ -13,6 +15,8 @@ import './RaffleToken.sol';
 
 error Raffle__TransferFailed();
 error Raffle__SendMoreToEnterRaffle();
+error Raffle__CannotBuyPartialTokens();
+error Raffle__RaffleDoesNotHaveEnoughTokens();
 error Raffle__NotOpen();
 error Raffle__AllReadyOpen();
 error Raffle__UpkeepNotNeeded(
@@ -34,6 +38,9 @@ contract Raffle is
     }
     RAFFLE_STATE private s_raffleState;
     RaffleToken public token;
+
+    // can be used but not needed for solidity > 0.8+
+    using SafeMath for uint256;
 
     /* State vars */
     uint256 private immutable i_entranceFee;
@@ -62,12 +69,6 @@ contract Raffle is
     uint256 private s_lastTimeStamp;
     uint256 private i_keepersUpdateInterval;
     address payable[] public s_playersAddresses;
-
-    // events
-    event RequestedRaffleWinner(uint256 indexed requestId);
-    event RaffleEnter(address indexed player);
-    event CalculatingWinner();
-    event WinnerDeclared(address indexed winner, uint256 indexed amountWon);
 
     constructor(
         address tokenAddress,
@@ -126,41 +127,50 @@ contract Raffle is
         s_raffleState = RAFFLE_STATE.OPEN;
     }
 
-    //TODO - increase stash
     function buyRaffleTokens()
         external
         payable
         raffleIsOpen
         returns (uint256 tokenAmount)
     {
+
         // 1 ether == 1e18 wei — 1,000,000,000,000,000,000 wei
 
         // 1 gwei (shannon) == 1e9 wei — 1,000,000,000
 
         // 1 ether == 1e9 gwei — 1,000,000,000
 
-        // Cost per token =  1e6 gwei - 1,000,000 = 1e-6 ether - 0.001 ether = ~£1.36
+        // Cost per token =  1e6 gwei - 1,000,000 gwei = 1e15 wei == 1e-6 ether - 0.001 ether = ~£1.36
 
-        require(msg.value == 0.1 ether, 'Send only 0.1 ETH to buy 100 tokens');
+        uint256 tokenCost = 1e6 gwei;
+        // buy 1 or more tokens
+        if(msg.value < tokenCost){
+            revert Raffle__SendMoreToEnterRaffle();
+        }
 
-        // Can only buy 100 at a time.
-        uint256 amountToBuy = 100;
+        uint256 amountToBuy = msg.value.div(tokenCost);
 
-        emit Log(msg.sender, amountToBuy, 'Bought tokens');
-        // basically this on cmd RaffleToken.balanceOf(raffle.address)
-        uint256 raffleTokenBalance = token.balanceOf(address(this));
-        require(
-            raffleTokenBalance >= amountToBuy,
-            'Vendor contract has not enough tokens in its balance'
-        );
+        console.log('amountToBuy',amountToBuy);
+
+        // Make sure we are buying whole tokens
+        if(amountToBuy.mod(1) == 0){
+            revert Raffle__CannotBuyPartialTokens();
+        }
+
+        // check there is enough tokens available
+        if(token.balanceOf(address(this)) >= amountToBuy)   {
+            revert Raffle__RaffleDoesNotHaveEnoughTokens();
+        }
 
         // Contract A calls Contract B
         // _transfer(RaffleContract, account[1], amountToBuy);
         // msg.sender is different from msg.sender in the erc20 as its the raffleContract in erc20
         bool sent = token.transfer(msg.sender, amountToBuy);
-        require(sent, 'Failed to transfer token to user');
+        if(sent){
+            revert Raffle__TransferFailed();
+        }
 
-        emit BuyTokens(msg.sender, msg.value, amountToBuy);
+        emit BoughtTokens(msg.sender, amountToBuy, msg.value);
 
         return amountToBuy;
     }

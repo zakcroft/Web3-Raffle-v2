@@ -19,7 +19,8 @@ const networkConfig: NetworkConfigType = {
   31337: {
     name: 'localhost',
     subscriptionId: 9214,
-    entranceFee: ethers.utils.parseEther('0.01'),
+    entranceFee: ethers.utils.parseUnits("1000000", "gwei"),
+// { BigNumber: "121000000000
     gasLane:
       '0xd89b2bf150e3b9e13446986e571fb9cab24b13cea0a43ea20a6049a85cc807cc', //this is mocked
     callbackGasLimit: 100000,
@@ -39,7 +40,9 @@ const networkConfig: NetworkConfigType = {
     name: 'bnbTest',
     vrfCoordinator: '0x6A2AAd07396B36Fe02a22b33cf443582f682c82f',
     subscriptionId: 1498,
-    entranceFee: ethers.utils.parseEther('0.01'),
+    //entranceFee: ethers.utils.parseUnits('1000000 ', 'gwei'), //0.001 ether
+    //entranceFee: ethers.utils.parseUnits('1 ', 'gwei'), //0.001 ether
+
     gasLane:
       '0xd4bb89654db74673a187bd804519e65e3f71a52bc55f11da7601a13dcf505314', //gasLaneRinkeby30
     callbackGasLimit: 100000,

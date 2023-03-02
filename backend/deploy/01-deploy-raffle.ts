@@ -42,7 +42,7 @@ const deployRaffle: DeployFunction = async function (
 
   const { entranceFee, gasLane, callbackGasLimit, keepersUpdateInterval } =
     networkConfig[chainId as number] || {};
-
+  console.log('entranceFee', entranceFee?.toString());
   const _MAX_COINS = 1000000;
   const _INIT_SALES_ALLOCATION = 1000;
 
