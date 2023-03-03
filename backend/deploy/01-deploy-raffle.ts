@@ -54,8 +54,7 @@ const deployRaffle: DeployFunction = async function (
     // @ts-ignore
     waitConfirmations: network.config.blockConfirmations || 1,
   });
-   log(`RaffleToken deployed at ${raffleTokenDeployObject.address}`);
-
+  log(`RaffleToken deployed at ${raffleTokenDeployObject.address}`);
 
   // RAFFLE
   const args = [
@@ -92,29 +91,39 @@ const deployRaffle: DeployFunction = async function (
   // const tokenLinkedToDeployedInstance = await ethers.getContractAt("RaffleToken", RaffleToken.address);
   // log(`3: deployed tokenLinkedToDeployedInstance `, tokenLinkedToDeployedInstance);
 
-  const raffleTokenDeployed = await ethers.getContractAt("RaffleToken", raffleTokenDeployObject.address);
+  const raffleTokenDeployed = await ethers.getContractAt(
+    'RaffleToken',
+    raffleTokenDeployObject.address,
+  );
   log(`raffleToken`, raffleTokenDeployed);
 
-  await raffleTokenDeployed.transfer(raffleDeployObject.address, _INIT_SALES_ALLOCATION);
-  log(`raffleToken.transfer to raffle _INIT_SALES_ALLOCATION ...`, raffleDeployObject.address, _INIT_SALES_ALLOCATION);
+  await raffleTokenDeployed.transfer(
+    raffleDeployObject.address,
+    _INIT_SALES_ALLOCATION,
+  );
+  log(
+    `raffleToken.transfer to raffle _INIT_SALES_ALLOCATION ...`,
+    raffleDeployObject.address,
+    _INIT_SALES_ALLOCATION,
+  );
 
   log(`deployer`, deployer);
   const ownerBalance = await raffleTokenDeployed.balanceOf(deployer);
-  const raffleBalance = await raffleTokenDeployed.balanceOf(raffleDeployObject.address);
-   log(`ownerBalance`, ownerBalance.toString());
-   log(`raffleBalance`, raffleBalance.toString());
+  const raffleBalance = await raffleTokenDeployed.balanceOf(
+    raffleDeployObject.address,
+  );
+  log(`ownerBalance`, ownerBalance.toString());
+  log(`raffleBalance`, raffleBalance.toString());
 
-   // await deployments.all('VRFCoordinatorV2Mock:');
-   // const rt = await deployments.get('RaffleToken');
+  // await deployments.all('VRFCoordinatorV2Mock:');
+  // const rt = await deployments.get('RaffleToken');
   const localhostDeploy = await deploy('RaffleToken2', {
     from: deployer,
-    contract:'RaffleToken',
+    contract: 'RaffleToken',
     args: [_MAX_COINS],
   });
   //log(`localhostDeploy`, localhostDeploy);
   log(`deployer`, deployer.deploy);
-
-
 
   // const t = await deployments.get('RaffleToken');
   // const r = await deployments.get('Raffle');

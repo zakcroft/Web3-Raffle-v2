@@ -39,8 +39,8 @@
     "hardhat-shorthand": "^1.0.0"
   },
   "scripts": {
-    "prettier": "../node_modules/.bin/prettier --write '{**/*.{js,css,html,tsx,json,sol,ts},test/*.js,.json}'",
-    "solhint": "../node_modules/.bin/solhint contracts/*.sol",
+    "prettier": "./node_modules/.bin/prettier --write '{**/*.{js,css,html,tsx,json,sol,ts},test/*.js,.json}'",
+    "solhint": "./node_modules/.bin/solhint contracts/*.sol",
     "lint": "pnpm solhint && pnpm eslint"
   }
 }

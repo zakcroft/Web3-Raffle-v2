@@ -1,15 +1,34 @@
-import { ethers } from 'hardhat';
-import { BigNumber } from "ethers";
+import { ethers, getNamedAccounts } from 'hardhat';
+
+import { BigNumber } from 'ethers';
 
 async function buyRaffleTokens() {
+  const accounts = await getNamedAccounts();
+  const owner = accounts.deployer;
+  const player = accounts.player;
+
   console.log('buyRaffleTokens');
-  const raffle = await ethers.getContract('Raffle');
+  const raffle = await ethers.getContract('Raffle', player);
+  const raffleToken = await ethers.getContract('RaffleToken', player);
   const tokenCost = await raffle.getTokenCost();
   console.log('tokenCost!', tokenCost.toString());
-  console.log('tokenCos2!',BigNumber.from(tokenCost.mul(10)).toString());
+
   // buy 10 tokens
-  await raffle.buyRaffleTokens({ value: BigNumber.from(tokenCost.mul(10))   });
-  console.log('Bought Raffle Tokens');
+  const tokensToBuy = BigNumber.from(tokenCost.mul(10));
+  await raffle.buyRaffleTokens({ value: tokensToBuy });
+  console.log('Bought Raffle Tokens', tokensToBuy.toString());
+
+  const amountToEnter = BigNumber.from('3');
+  console.log('owner', owner);
+  console.log('player', player);
+
+  // approve the raffle to spend the tokens
+  await raffleToken.increaseAllowance(raffle.address, amountToEnter.toString());
+
+  const allowanceSet = await raffleToken.allowance(player, raffle.address);
+
+  await raffle.enterRaffle(amountToEnter);
+  console.log('Entered Raffle with ', allowanceSet.toString(), ' token(s)');
 }
 
 buyRaffleTokens()

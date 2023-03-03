@@ -14,9 +14,16 @@ import './Events.sol';
 import './RaffleToken.sol';
 
 error Raffle__TransferFailed();
+
+// buy tokens
 error Raffle__SendMoreToEnterRaffle();
 error Raffle__CannotBuyPartialTokens();
 error Raffle__RaffleDoesNotHaveEnoughTokens();
+
+// enter
+error Raffle__YouNeedToBuyMoreTokens();
+error Raffle__YouNeedToApproveRaffleTokens();
+error Raffle__MinimumOneTokenToEnter();
 error Raffle__NotOpen();
 error Raffle__AllReadyOpen();
 error Raffle__UpkeepNotNeeded(
@@ -101,21 +108,19 @@ contract Raffle is
     }
 
     function setPlayer(address addr, uint256 amount) private raffleIsOpen {
-        // TODO - check how we store players
         s_playersAddresses.push(payable(addr));
         player = Player(addr, amount);
         players[addr] = player;
     }
 
     function updatePlayer(address addr, uint256 amount) private raffleIsOpen {
-        // TODO - check how we store players
         player = players[addr];
         player.totalEntered = player.totalEntered + amount;
         players[addr] = player;
     }
 
     function closeRaffle() public onlyOwner raffleIsOpen {
-   // TODO - is there a better ay to reset the array?
+        // TODO - is there a better ay to reset the array?
         s_playersAddresses = new address payable[](0);
         s_raffleState = RAFFLE_STATE.CLOSED;
     }
@@ -142,19 +147,19 @@ contract Raffle is
         // Cost per token =  1e6 gwei = 1e15 wei == 1e-3 ether - 0.001 ether = ~£1.36
 
         // buy 1 or more tokens
-        if(msg.value < i_tokenCost){
+        if (msg.value < i_tokenCost) {
             revert Raffle__SendMoreToEnterRaffle();
         }
 
         uint256 amountToBuy = msg.value.div(i_tokenCost);
 
         // Make sure we are buying whole tokens
-        if(amountToBuy.mod(i_tokenCost) == 0){
+        if (amountToBuy.mod(i_tokenCost) == 0) {
             revert Raffle__CannotBuyPartialTokens();
         }
 
         // Check there is enough tokens available
-        if(token.balanceOf(address(this)) <= amountToBuy)   {
+        if (token.balanceOf(address(this)) <= amountToBuy) {
             revert Raffle__RaffleDoesNotHaveEnoughTokens();
         }
 
@@ -163,7 +168,7 @@ contract Raffle is
         // msg.sender is different from msg.sender in the erc20 as its the raffleContract in erc20
         bool sent = token.transfer(msg.sender, amountToBuy);
 
-        if(!sent){
+        if (!sent) {
             revert Raffle__TransferFailed();
         }
 
@@ -172,27 +177,31 @@ contract Raffle is
         return amountToBuy;
     }
 
-    //TODO - Enter raffle
     function enterRaffle(
         uint256 raffleTokensAmountToEnter
     ) external raffleIsOpen {
+
+        // sent enough tokens to enter
+        console.log('raffleTokensAmountToEnter', raffleTokensAmountToEnter);
+        if (raffleTokensAmountToEnter < 1) {
+            revert Raffle__MinimumOneTokenToEnter();
+        }
+
+        // Check have bought some tokens
         uint256 playerBalance = token.balanceOf(msg.sender);
-        require(
-            playerBalance >= 0,
-            'You need to approve raffleTokens from the raffle contract first'
-        );
-        require(
-            raffleTokensAmountToEnter >= 100,
-            'Minimum 100 RaffleTokens to enter'
-        );
+        console.log('playerBalance', playerBalance);
+        if (playerBalance <= 0) {
+            revert Raffle__YouNeedToBuyMoreTokens();
+        }
 
-        // does not work
-        // token.approve(address(this), amountToEnter)
-        // because Raffle calls raffleTokens and msg.sender becomes Raffle in raffleTokens.approve
-        // not the msg.sender of the call to enterRaffle()
-        // Contract A calls Contract B
+        // Check have approved the raffle contract to use there tokens
+        uint256 allowance = token.allowance(msg.sender, address(this));
+        console.log('token.allowance', allowance);
+        if (allowance <= 0) {
+            revert Raffle__YouNeedToApproveRaffleTokens();
+        }
 
-        // so bought them and then send back to enter the raffle.
+        // Enter raffle
         token.transferFrom(
             msg.sender,
             address(this),
@@ -206,15 +215,19 @@ contract Raffle is
             setPlayer(msg.sender, raffleTokensAmountToEnter);
         }
 
-        emit Log(
-            msg.sender,
-            players[msg.sender].totalEntered,
-            'Raffle Entered'
-        );
+        console.log('ENTERED with', players[msg.sender].totalEntered);
+
+        uint256 newPlayerBalance = token.balanceOf(msg.sender);
+        console.log('newPlayerBalance', newPlayerBalance);
+        uint256 newAllowance = token.allowance(msg.sender, address(this));
+        console.log('newAllowance', newAllowance);
+        emit EnteredRaffle(msg.sender, players[msg.sender].totalEntered);
     }
 
     // TODO calldata or memory?
-    function pickWinner(uint256[] memory randomWords) public raffleIsOpen onlyOwner {
+    function pickWinner(
+        uint256[] memory randomWords
+    ) public raffleIsOpen onlyOwner {
         s_raffleState = RAFFLE_STATE.CALCULATING_WINNER;
         emit CalculatingWinner();
 
