@@ -257,6 +257,14 @@ contract Raffle is
         emit WinnerDeclared(s_lastWinner, winnings);
     }
 
+    // Chainlink VRF Callback for getting the random number
+    function fulfillRandomWords(
+        uint256 requestId,
+        uint256[] memory randomWords
+    ) internal override {
+        pickWinner(randomWords);
+    }
+
     function checkUpkeep(
         bytes memory /* checkData */
     )
@@ -299,14 +307,6 @@ contract Raffle is
         );
 
         emit RequestedRaffleWinner(requestId);
-    }
-
-    // Chainlink VRF Callback for getting the random number
-    function fulfillRandomWords(
-        uint256 requestId,
-        uint256[] memory randomWords
-    ) internal override {
-        pickWinner(randomWords);
     }
 
     // pure and views getters
