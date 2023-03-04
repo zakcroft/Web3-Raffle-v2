@@ -36,7 +36,7 @@ module.exports = {
       url: process.env.SEPOLIA_URL_INFURA,
       accounts: [process.env.DEV_1_PRIVATE_KEY],
       chainId: 11155111,
-      blockConfirmations: 6,
+      blockConfirmations: 2,
     },
     bscTest: {
       url: process.env.BNB_TESTNET_RPC_URL_QUICKNODE,

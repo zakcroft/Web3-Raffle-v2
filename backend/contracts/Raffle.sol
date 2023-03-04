@@ -8,6 +8,7 @@ import '@openzeppelin/contracts/utils/structs/EnumerableMap.sol';
 
 import '@chainlink/contracts/src/v0.8/interfaces/VRFCoordinatorV2Interface.sol';
 import '@chainlink/contracts/src/v0.8/VRFConsumerBaseV2.sol';
+
 import '@chainlink/contracts/src/v0.8/KeeperCompatible.sol';
 import '@chainlink/contracts/src/v0.8/KeeperCompatible.sol';
 import 'hardhat/console.sol';
@@ -62,9 +63,9 @@ contract Raffle is
     VRFCoordinatorV2Interface private immutable i_vrfCoordinator;
     bytes32 private i_gasLane;
     uint64 private i_subscriptionId;
-    uint16 private constant REQUEST_CONFIRMATIONS = 3;
+    uint16 private constant VRF_REQUEST_CONFIRMATIONS = 3;
     uint32 private i_callbackGasLimit;
-    uint32 private constant NUM_WORDS = 1;
+    uint32 private constant VRF_NUM_WORDS = 1;
 
     // raffle variables
     uint256 private constant _PRIZE_FUND = 1000;
@@ -291,7 +292,7 @@ contract Raffle is
         returns (bool upkeepNeeded, bytes memory /* performData */)
     {
         bool isOpen = RAFFLE_STATE.OPEN == s_raffleState;
-        bool timePassed = (block.timestamp - s_lastTimeStamp) >
+        bool timePassed = (block.timestamp - getLastTimeStamp()) >
             i_keepersUpdateInterval;
         bool hasPLayers = getNumberOfPlayers() > 0;
         bool hasBalance = address(this).balance > 0;
@@ -301,6 +302,9 @@ contract Raffle is
         return (upkeepNeeded, '0x0');
     }
 
+    //external
+    //onlyOwner
+    //returns (uint256 requestId)
     // Just changing this function from requestRandomWords to performUpkeep
     // function requestRandomWords() external onlyOwner {
     function performUpkeep(bytes calldata performData) external override {
@@ -318,9 +322,9 @@ contract Raffle is
         uint256 requestId = i_vrfCoordinator.requestRandomWords(
             i_gasLane,
             i_subscriptionId,
-            REQUEST_CONFIRMATIONS,
+            VRF_REQUEST_CONFIRMATIONS,
             i_callbackGasLimit,
-            NUM_WORDS
+            VRF_NUM_WORDS
         );
 
         emit RequestedRaffleWinner(requestId);
@@ -350,15 +354,11 @@ contract Raffle is
     }
 
     function getNumWords() public pure returns (uint256) {
-        return NUM_WORDS;
-    }
-
-    function getLatestTimestamp() public view returns (uint256) {
-        return s_lastTimeStamp;
+        return VRF_NUM_WORDS;
     }
 
     function getRequestConfirmations() public pure returns (uint256) {
-        return REQUEST_CONFIRMATIONS;
+        return VRF_REQUEST_CONFIRMATIONS;
     }
 
     function getRaffleKeeperInterval() public view returns (uint256) {
@@ -370,5 +370,6 @@ contract Raffle is
     }
 
     receive() external payable {}
+
     fallback() external payable {}
 }

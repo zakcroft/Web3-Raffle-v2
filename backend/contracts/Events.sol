@@ -21,5 +21,4 @@ contract Events {
     event CalculatingWinner();
     event WinningsSent(address indexed winner, uint256 indexed amountWon);
     event RaffleFeeSent(address indexed winner, uint256 indexed raffeFee);
-
 }

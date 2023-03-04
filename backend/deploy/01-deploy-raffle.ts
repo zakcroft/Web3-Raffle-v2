@@ -13,35 +13,45 @@ const deployRaffle: DeployFunction = async function (
   const { deploy, log, get } = deployments;
   const { deployer } = await getNamedAccounts();
   const chainId = network.config.chainId;
-  const MOCK_FUND_AMOUNT = '1000000000000000000000';
+  const VRF_MOCK_FUND_AMOUNT = '1000000000000000000000';
 
   console.log('NETWORK ++++', network.name);
+
+  const helperNetworkConfig = networkConfig[chainId as number] || {};
+
   let vrfCoordinatorV2Address, subscriptionId;
+
+  // mock vrfCoordinatorV2
   if (developmentChains.includes(network.name)) {
     const vrfCoordinatorV2Mock = await ethers.getContract(
       'VRFCoordinatorV2Mock',
     );
     vrfCoordinatorV2Address = vrfCoordinatorV2Mock.address;
+
     const transactionResponse = await vrfCoordinatorV2Mock.createSubscription();
     const transactionReceipt = await transactionResponse.wait();
+
+    // console.log('transactionResponse===', transactionResponse);
+    // console.log('transactionReceipt===', transactionReceipt);
+
     subscriptionId = transactionReceipt.events[0].args.subId;
-    // Fund the subscription
-    // Our mock makes it so we don't actually have to worry about sending fund
+    //console.log('subscriptionId===', subscriptionId.toString());
     await vrfCoordinatorV2Mock.fundSubscription(
       subscriptionId,
-      MOCK_FUND_AMOUNT,
+      VRF_MOCK_FUND_AMOUNT,
     );
   } else {
-    vrfCoordinatorV2Address =
-      networkConfig[chainId as number]['vrfCoordinator']!;
-    subscriptionId = networkConfig[chainId as number]['subscriptionId']!;
+    // using test and main network
+    vrfCoordinatorV2Address = helperNetworkConfig['vrfCoordinator']!;
+    subscriptionId = helperNetworkConfig['subscriptionId']!;
   }
 
   log('----------------------------------------------------');
   log('Deploying Raffle and waiting for confirmations...');
 
   const { tokenCost, gasLane, callbackGasLimit, keepersUpdateInterval } =
-    networkConfig[chainId as number] || {};
+    helperNetworkConfig;
+
   console.log('entranceFee', tokenCost?.toString());
   const _MAX_COINS = 1000000;
   const _INIT_SALES_ALLOCATION = 1000;
