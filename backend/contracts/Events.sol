@@ -19,5 +19,7 @@ contract Events {
     event EnteredRaffle(address player, uint256 amount);
 
     event CalculatingWinner();
-    event WinnerDeclared(address indexed winner, uint256 indexed amountWon);
+    event WinningsSent(address indexed winner, uint256 indexed amountWon);
+    event RaffleFeeSent(address indexed winner, uint256 indexed raffeFee);
+
 }

@@ -55,7 +55,7 @@ contract Raffle is
     /* State vars */
     uint256 private immutable i_tokenCost;
     mapping(uint256 => EnumerableMap.AddressToUintMap) private s_games_players;
-    uint256 private s_gameID = 1;
+    uint256 private s_gameID = 0;
 
     /* State variables */
     // Chainlink VRF Variables
@@ -92,13 +92,11 @@ contract Raffle is
         s_raffleState = RAFFLE_STATE.OPEN;
         s_lastTimeStamp = block.timestamp;
         i_keepersUpdateInterval = keepersUpdateInterval;
-        s_raffleState = RAFFLE_STATE.OPEN;
     }
-
-
 
     // modifiers
     modifier raffleIsOpen() {
+        console.log('s_raffleState: %s', uint(s_raffleState));
         if (s_raffleState != RAFFLE_STATE.OPEN) {
             revert Raffle__NotOpen();
         }
@@ -114,16 +112,18 @@ contract Raffle is
         getPlayers().set(addr, totalEntered.add(amount));
     }
 
-    function closeRaffle() public onlyOwner raffleIsOpen {
-        s_raffleState = RAFFLE_STATE.CLOSED;
-    }
-
     function openRaffle() public onlyOwner {
         if (s_raffleState == RAFFLE_STATE.CLOSED) {
             revert Raffle__AllReadyOpen();
         }
         s_gameID = s_gameID += 1;
         s_raffleState = RAFFLE_STATE.OPEN;
+        console.log('Raffle Open with gameID: %s', s_gameID);
+    }
+
+    function closeRaffle() public onlyOwner {
+        s_raffleState = RAFFLE_STATE.CLOSED;
+        console.log('Raffle Closed');
     }
 
     function getPlayers()
@@ -237,17 +237,25 @@ contract Raffle is
 
         //calculating
         uint256 indexOfWinner = randomWords[0] % getNumberOfPlayers();
+
+        console.log('indexOfWinner', indexOfWinner);
         (address lastWinner, uint256 amount) = getPlayers().at(indexOfWinner);
+
+        console.log('lastWinner', lastWinner, amount);
         s_lastWinner = lastWinner;
 
-        // reset
         closeRaffle();
 
         s_lastTimeStamp = block.timestamp;
 
-        uint256 winnings = address(this).balance;
+        //TAKE 10% FEE
+        uint256 pot = address(this).balance;
+        uint256 winnings = pot.div(10).mul(9);
+        uint256 raffleFee = pot.div(10).mul(1);
 
-        //TODO TAKE 10% FEE
+        console.log('pot', pot);
+        console.log('winnings', winnings);
+        console.log('raffleCut', raffleFee);
 
         // TODO check this is cheaper to transfer this way
         // or payable(s_lastWinner).transfer(address(this).balance * 1);
@@ -255,8 +263,13 @@ contract Raffle is
         if (!success) {
             revert Raffle__TransferFailed();
         }
+        (bool raffleFeeSuccess, ) = s_owner.call{value: raffleFee}('');
+        if (!raffleFeeSuccess) {
+            revert Raffle__TransferFailed();
+        }
 
-        emit WinnerDeclared(s_lastWinner, winnings);
+        emit WinningsSent(s_lastWinner, winnings);
+        emit RaffleFeeSent(s_owner, raffleFee);
 
         return winnings;
     }
@@ -296,7 +309,7 @@ contract Raffle is
         if (!upKeepNeeded) {
             revert Raffle__UpkeepNotNeeded(
                 address(this).balance,
-                    getNumberOfPlayers(),
+                getNumberOfPlayers(),
                 uint256(s_raffleState)
             );
         }
@@ -319,7 +332,7 @@ contract Raffle is
     }
 
     function getPlayer(uint256 i) public view returns (address) {
-        (address player, uint256 amount)  = getPlayers().at(i);
+        (address player, uint256 amount) = getPlayers().at(i);
         return player;
     }
 
@@ -339,8 +352,6 @@ contract Raffle is
     function getNumWords() public pure returns (uint256) {
         return NUM_WORDS;
     }
-
-
 
     function getLatestTimestamp() public view returns (uint256) {
         return s_lastTimeStamp;
