@@ -29,6 +29,10 @@ async function buyRaffleTokens() {
 
   await raffle.enterRaffle(amountToEnter);
   console.log('Entered Raffle with ', allowanceSet.toString(), ' token(s)');
+
+  const deployerConnectedContract = raffle.connect(owner);
+  const winnings = await deployerConnectedContract.pickWinner([0x1]);
+  console.log('winner', winnings);
 }
 
 buyRaffleTokens()

@@ -4,6 +4,8 @@ pragma solidity >=0.4.22 <0.9.0;
 
 import '@openzeppelin/contracts/access/Ownable.sol';
 import '@openzeppelin/contracts/utils/math/SafeMath.sol';
+import '@openzeppelin/contracts/utils/structs/EnumerableMap.sol';
+
 import '@chainlink/contracts/src/v0.8/interfaces/VRFCoordinatorV2Interface.sol';
 import '@chainlink/contracts/src/v0.8/VRFConsumerBaseV2.sol';
 import '@chainlink/contracts/src/v0.8/KeeperCompatible.sol';
@@ -48,17 +50,12 @@ contract Raffle is
 
     // can be used but not needed for solidity > 0.8+
     using SafeMath for uint256;
+    using EnumerableMap for EnumerableMap.AddressToUintMap;
 
     /* State vars */
     uint256 private immutable i_tokenCost;
-
-    struct Player {
-        address addr;
-        uint256 totalEntered;
-    }
-    Player public player;
-    mapping(address => Player) public players;
-    address payable[] private s_players;
+    mapping(uint256 => EnumerableMap.AddressToUintMap) private s_games_players;
+    uint256 private s_gameID = 1;
 
     /* State variables */
     // Chainlink VRF Variables
@@ -75,7 +72,6 @@ contract Raffle is
     address private s_lastWinner;
     uint256 private s_lastTimeStamp;
     uint256 private i_keepersUpdateInterval;
-    address payable[] public s_playersAddresses;
 
     constructor(
         address tokenAddress,
@@ -99,6 +95,8 @@ contract Raffle is
         s_raffleState = RAFFLE_STATE.OPEN;
     }
 
+
+
     // modifiers
     modifier raffleIsOpen() {
         if (s_raffleState != RAFFLE_STATE.OPEN) {
@@ -108,20 +106,15 @@ contract Raffle is
     }
 
     function setPlayer(address addr, uint256 amount) private raffleIsOpen {
-        s_playersAddresses.push(payable(addr));
-        player = Player(addr, amount);
-        players[addr] = player;
+        getPlayers().set(addr, amount);
     }
 
     function updatePlayer(address addr, uint256 amount) private raffleIsOpen {
-        player = players[addr];
-        player.totalEntered = player.totalEntered + amount;
-        players[addr] = player;
+        uint256 totalEntered = getPlayers().get(addr);
+        getPlayers().set(addr, totalEntered.add(amount));
     }
 
     function closeRaffle() public onlyOwner raffleIsOpen {
-        // TODO - is there a better ay to reset the array?
-        s_playersAddresses = new address payable[](0);
         s_raffleState = RAFFLE_STATE.CLOSED;
     }
 
@@ -129,7 +122,16 @@ contract Raffle is
         if (s_raffleState == RAFFLE_STATE.CLOSED) {
             revert Raffle__AllReadyOpen();
         }
+        s_gameID = s_gameID += 1;
         s_raffleState = RAFFLE_STATE.OPEN;
+    }
+
+    function getPlayers()
+        internal
+        view
+        returns (EnumerableMap.AddressToUintMap storage)
+    {
+        return s_games_players[s_gameID];
     }
 
     function buyRaffleTokens()
@@ -180,7 +182,6 @@ contract Raffle is
     function enterRaffle(
         uint256 raffleTokensAmountToEnter
     ) external raffleIsOpen {
-
         // sent enough tokens to enter
         console.log('raffleTokensAmountToEnter', raffleTokensAmountToEnter);
         if (raffleTokensAmountToEnter < 1) {
@@ -208,39 +209,40 @@ contract Raffle is
             raffleTokensAmountToEnter
         );
 
-        if (players[msg.sender].totalEntered > 0) {
+        if (getPlayers().contains(msg.sender)) {
             updatePlayer(msg.sender, raffleTokensAmountToEnter);
         } else {
             // new player
             setPlayer(msg.sender, raffleTokensAmountToEnter);
         }
 
-        console.log('ENTERED with', players[msg.sender].totalEntered);
+        console.log('ENTERED with', getPlayers().get(msg.sender));
 
         uint256 newPlayerBalance = token.balanceOf(msg.sender);
         console.log('newPlayerBalance', newPlayerBalance);
         uint256 newAllowance = token.allowance(msg.sender, address(this));
         console.log('newAllowance', newAllowance);
-        emit EnteredRaffle(msg.sender, players[msg.sender].totalEntered);
+        emit EnteredRaffle(msg.sender, getPlayers().get(msg.sender));
     }
 
     // TODO calldata or memory?
     function pickWinner(
         uint256[] memory randomWords
-    ) public raffleIsOpen onlyOwner {
+    ) public raffleIsOpen onlyOwner returns (uint256) {
         s_raffleState = RAFFLE_STATE.CALCULATING_WINNER;
         emit CalculatingWinner();
 
         console.log('randomWords', randomWords[0]);
+        console.log('getNumberOfPlayers', getNumberOfPlayers());
 
         //calculating
-        uint256 indexOfWinner = randomWords[0] % s_players.length;
-        address payable lastWinner = s_players[indexOfWinner];
+        uint256 indexOfWinner = randomWords[0] % getNumberOfPlayers();
+        (address lastWinner, uint256 amount) = getPlayers().at(indexOfWinner);
         s_lastWinner = lastWinner;
 
         // reset
-        s_raffleState = RAFFLE_STATE.OPEN;
-        s_players = new address payable[](0);
+        closeRaffle();
+
         s_lastTimeStamp = block.timestamp;
 
         uint256 winnings = address(this).balance;
@@ -255,6 +257,8 @@ contract Raffle is
         }
 
         emit WinnerDeclared(s_lastWinner, winnings);
+
+        return winnings;
     }
 
     // Chainlink VRF Callback for getting the random number
@@ -276,7 +280,7 @@ contract Raffle is
         bool isOpen = RAFFLE_STATE.OPEN == s_raffleState;
         bool timePassed = (block.timestamp - s_lastTimeStamp) >
             i_keepersUpdateInterval;
-        bool hasPLayers = s_players.length > 0;
+        bool hasPLayers = getNumberOfPlayers() > 0;
         bool hasBalance = address(this).balance > 0;
 
         // upkeepNeeded automatically returned as defined bool upkeepNeeded in return
@@ -292,7 +296,7 @@ contract Raffle is
         if (!upKeepNeeded) {
             revert Raffle__UpkeepNotNeeded(
                 address(this).balance,
-                s_players.length,
+                    getNumberOfPlayers(),
                 uint256(s_raffleState)
             );
         }
@@ -315,7 +319,13 @@ contract Raffle is
     }
 
     function getPlayer(uint256 i) public view returns (address) {
-        return s_players[i];
+        (address player, uint256 amount)  = getPlayers().at(i);
+        return player;
+    }
+
+    function getNumberOfPlayers() public view returns (uint256) {
+        EnumerableMap.AddressToUintMap storage players = getPlayers();
+        return players.length();
     }
 
     function getLastWinner() public view returns (address) {
@@ -330,9 +340,7 @@ contract Raffle is
         return NUM_WORDS;
     }
 
-    function getNumberOfPlayers() public view returns (uint256) {
-        return s_players.length;
-    }
+
 
     function getLatestTimestamp() public view returns (uint256) {
         return s_lastTimeStamp;
