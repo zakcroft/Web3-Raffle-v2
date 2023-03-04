@@ -370,40 +370,5 @@ contract Raffle is
     }
 
     receive() external payable {}
-
     fallback() external payable {}
 }
-
-// cmds
-
-// const raffle  = await Raffle.deployed()
-// const raffleToken  = await RaffleToken.deployed()
-
-// web3.eth.getBalance(raffle.address);  // no eth
-// raffleToken.balanceOf(raffle.address) // gives raffle quota 1000000
-
-// await raffleToken.totalSupply() // gives max coins 2500000
-
-// raffleToken.balanceOf(accounts[1])  0
-
-// raffle.buyRaffleTokens({ from:accounts[1], value:"100000000000000000"})
-
-// must approve from the token first.
-// raffleToken.allowance(accounts[1], raffle.address) // 0
-// raffleToken.approve(raffle.address, "100", { from:accounts[1] }); // owner => (spender => amount)
-// raffleToken.allowance(accounts[1], raffle.address) // 100
-
-// Now enter and use the transferFrom
-// const res = await raffle.enterRaffle("100", { from:accounts[1] })
-
-// raffle.playersEnteredBalance[accounts[1]]
-
-// raffle.pickWinner()
-
-// Other
-// res.logs[1].args.amount
-
-// fromWei converts any wei value into a ether value.
-// const amountToBuy =  web3.utils.fromWei("100000000000000000")
-
-// RaffleToken.allowance(accounts[1], Raffle.address)
