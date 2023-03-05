@@ -1,14 +1,11 @@
 import { ethers, getNamedAccounts } from 'hardhat';
 
 import { BigNumber } from 'ethers';
+import { logStats } from "./logStats";
 
 async function enterRaffle() {
   const accounts = await getNamedAccounts();
-  const owner = accounts.deployer;
   const player = accounts.player;
-
-  console.log('Raffle contract owner', owner);
-  console.log('Player entering RaffleTokens', player);
 
   const raffle = await ethers.getContract('Raffle', player);
   const raffleToken = await ethers.getContract('RaffleToken', player);
@@ -28,14 +25,7 @@ async function enterRaffle() {
     'token(s)',
   );
 
-  const tokenBalanceAfterAllowances = await raffleToken.balanceOf(player);
-  console.log(
-    'New RaffleToken contract balance:',
-    tokenBalanceAfterAllowances.toString(),
-  );
-
-  const raffleBalance = await raffle.getPlayerBalance(player);
-  console.log('Updated Raffle contract balance:', raffleBalance.toString());
+  await logStats('After enter');
 }
 
 enterRaffle()

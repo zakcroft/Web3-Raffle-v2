@@ -3,6 +3,7 @@ import { ethers, network } from 'hardhat';
 import { BigNumber } from 'ethers';
 
 import { Raffle, VRFCoordinatorV2Mock } from '../typechain-types';
+import { logStats } from "./logStats";
 
 async function mockKeepers() {
   const raffle: Raffle = await ethers.getContract('Raffle');
@@ -38,6 +39,8 @@ async function mockVrf(requestId: BigNumber, raffle: Raffle) {
 
   const recentWinner = await raffle.getLastWinner();
   console.log(`The winner is: ${recentWinner}`);
+
+  await logStats('After VRF draw');
 }
 
 mockKeepers()
