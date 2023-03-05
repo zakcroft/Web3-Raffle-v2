@@ -8,7 +8,7 @@ export interface networkConfigItem {
   gasLane?: string;
   callbackGasLimit?: number;
   tokenCost?: BigNumber;
-  keepersUpdateInterval?: number;
+  automationUpdateInterval?: number;
 }
 
 interface NetworkConfigType {
@@ -25,7 +25,7 @@ const networkConfig: NetworkConfigType = {
     gasLane:
       '0xd89b2bf150e3b9e13446986e571fb9cab24b13cea0a43ea20a6049a85cc807cc', //this is mocked
     callbackGasLimit: 100000,
-    keepersUpdateInterval: 30,
+    automationUpdateInterval: 30,
   },
   4: {
     name: 'sepolia',
@@ -34,7 +34,7 @@ const networkConfig: NetworkConfigType = {
     tokenCost,
     gasLane: "0x474e34a077df58807dbe9c96d3c009b23b3c6d0cce433e59bbf5b34f823bc56c", //30 gwei
     callbackGasLimit: 100000,
-    keepersUpdateInterval: 30,
+    automationUpdateInterval: 30,
   },
   97: {
     name: 'bnbTest',
@@ -46,7 +46,7 @@ const networkConfig: NetworkConfigType = {
     gasLane:
       '0xd4bb89654db74673a187bd804519e65e3f71a52bc55f11da7601a13dcf505314', //gasLaneRinkeby30
     callbackGasLimit: 100000,
-    keepersUpdateInterval: 1,
+    automationUpdateInterval: 1,
   },
 };
 

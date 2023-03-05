@@ -6,11 +6,11 @@ import '@openzeppelin/contracts/access/Ownable.sol';
 import '@openzeppelin/contracts/utils/math/SafeMath.sol';
 import '@openzeppelin/contracts/utils/structs/EnumerableMap.sol';
 
-import '@chainlink/contracts/src/v0.8/interfaces/VRFCoordinatorV2Interface.sol';
 import '@chainlink/contracts/src/v0.8/VRFConsumerBaseV2.sol';
+import '@chainlink/contracts/src/v0.8/interfaces/VRFCoordinatorV2Interface.sol';
 
-import '@chainlink/contracts/src/v0.8/KeeperCompatible.sol';
-import '@chainlink/contracts/src/v0.8/KeeperCompatible.sol';
+import '@chainlink/contracts/src/v0.8/AutomationCompatible.sol';
+
 import 'hardhat/console.sol';
 
 import './Events.sol';
@@ -27,6 +27,7 @@ error Raffle__RaffleDoesNotHaveEnoughTokens();
 error Raffle__YouNeedToBuyMoreTokens();
 error Raffle__YouNeedToApproveRaffleTokens();
 error Raffle__MinimumOneTokenToEnter();
+
 error Raffle__NotOpen();
 error Raffle__AllReadyOpen();
 error Raffle__UpkeepNotNeeded(
@@ -35,12 +36,7 @@ error Raffle__UpkeepNotNeeded(
     uint256 raffelState
 );
 
-contract Raffle is
-    Ownable,
-    Events,
-    VRFConsumerBaseV2,
-    KeeperCompatibleInterface
-{
+contract Raffle is Ownable, Events, VRFConsumerBaseV2, AutomationCompatible {
     enum RAFFLE_STATE {
         OPEN,
         CLOSED,
@@ -71,8 +67,8 @@ contract Raffle is
     uint256 private constant _PRIZE_FUND = 1000;
     address private s_owner;
     address private s_lastWinner;
-    uint256 private s_lastTimeStamp;
-    uint256 private i_keepersUpdateInterval;
+    uint256 private s_lastDrawTimeStamp;
+    uint256 private i_automationUpdateInterval;
 
     constructor(
         address tokenAddress,
@@ -81,7 +77,7 @@ contract Raffle is
         uint256 tokenCost,
         bytes32 gasLane,
         uint32 callbackGasLimit,
-        uint256 keepersUpdateInterval
+        uint256 automationUpdateInterval
     ) VRFConsumerBaseV2(vrfCoordinatorV2) {
         token = RaffleToken(tokenAddress);
         s_owner = msg.sender;
@@ -91,8 +87,8 @@ contract Raffle is
         i_gasLane = gasLane;
         i_callbackGasLimit = callbackGasLimit;
         s_raffleState = RAFFLE_STATE.OPEN;
-        s_lastTimeStamp = block.timestamp;
-        i_keepersUpdateInterval = keepersUpdateInterval;
+        s_lastDrawTimeStamp = block.timestamp;
+        i_automationUpdateInterval = automationUpdateInterval;
     }
 
     // modifiers
@@ -114,9 +110,10 @@ contract Raffle is
     }
 
     function openRaffle() public onlyOwner {
-        if (s_raffleState == RAFFLE_STATE.CLOSED) {
+        if (s_raffleState != RAFFLE_STATE.CLOSED) {
             revert Raffle__AllReadyOpen();
         }
+
         s_gameID = s_gameID += 1;
         s_raffleState = RAFFLE_STATE.OPEN;
         console.log('Raffle Open with gameID: %s', s_gameID);
@@ -229,10 +226,7 @@ contract Raffle is
     // TODO calldata or memory?
     function pickWinner(
         uint256[] memory randomWords
-    ) public raffleIsOpen onlyOwner returns (uint256) {
-        s_raffleState = RAFFLE_STATE.CALCULATING_WINNER;
-        emit CalculatingWinner();
-
+    ) public returns (uint256) {
         console.log('randomWords', randomWords[0]);
         console.log('getNumberOfPlayers', getNumberOfPlayers());
 
@@ -242,12 +236,13 @@ contract Raffle is
         console.log('indexOfWinner', indexOfWinner);
         (address lastWinner, uint256 amount) = getPlayers().at(indexOfWinner);
 
+
+        s_raffleState = RAFFLE_STATE.CLOSED;
+        console.log('Raffle Closed');
         console.log('lastWinner', lastWinner, amount);
         s_lastWinner = lastWinner;
 
-        closeRaffle();
 
-        s_lastTimeStamp = block.timestamp;
 
         //TAKE 10% FEE
         uint256 pot = address(this).balance;
@@ -269,56 +264,76 @@ contract Raffle is
             revert Raffle__TransferFailed();
         }
 
+        s_lastDrawTimeStamp = block.timestamp;
         emit WinningsSent(s_lastWinner, winnings);
         emit RaffleFeeSent(s_owner, raffleFee);
 
         return winnings;
     }
 
-    // Chainlink VRF Callback for getting the random number
-    function fulfillRandomWords(
-        uint256 requestId,
-        uint256[] memory randomWords
-    ) internal override {
-        pickWinner(randomWords);
+    function canMakeRaffleDraw()
+        private
+        view
+        onlyOwner
+        returns (bool triggerRaffleDaw)
+    {
+        bool isOpen = RAFFLE_STATE.OPEN == s_raffleState;
+
+        bool timePassed = (block.timestamp - getLastDrawTimeStamp()) >
+            i_automationUpdateInterval;
+
+        bool hasPLayers = getNumberOfPlayers() > 0;
+
+        bool hasBalance = address(this).balance > 0;
+
+        triggerRaffleDaw = (timePassed && isOpen && hasBalance && hasBalance);
+
+        console.log('block.timestamp', block.timestamp);
+        console.log('getLastTimeStamp()', getLastDrawTimeStamp());
+        console.log('block.timestamp - getLastTimeStamp()', block.timestamp - getLastDrawTimeStamp());
+        console.log('timePassed', timePassed);
+        console.log('isOpen', isOpen);
+        console.log('hasPLayers', hasPLayers);
+        console.log('hasBalance', hasBalance);
+        console.log('triggerRaffleDaw', triggerRaffleDaw);
+
+        return triggerRaffleDaw;
     }
 
+    // checkData can be used for control what is checked
     function checkUpkeep(
         bytes memory /* checkData */
     )
         public
         view
         override
-        returns (bool upkeepNeeded, bytes memory /* performData */)
+        returns (bool triggerRaffleDaw, bytes memory /* performData */)
     {
-        bool isOpen = RAFFLE_STATE.OPEN == s_raffleState;
-        bool timePassed = (block.timestamp - getLastTimeStamp()) >
-            i_keepersUpdateInterval;
-        bool hasPLayers = getNumberOfPlayers() > 0;
-        bool hasBalance = address(this).balance > 0;
-
-        // upkeepNeeded automatically returned as defined bool upkeepNeeded in return
-        upkeepNeeded = (timePassed && isOpen && hasBalance && hasBalance);
-        return (upkeepNeeded, '0x0');
+        triggerRaffleDaw = canMakeRaffleDraw();
+        return (triggerRaffleDaw, '0x0');
     }
 
-    //external
-    //onlyOwner
-    //returns (uint256 requestId)
-    // Just changing this function from requestRandomWords to performUpkeep
-    // function requestRandomWords() external onlyOwner {
+    // performData can be used to pass in data to the performUpkeep function
     function performUpkeep(bytes calldata performData) external override {
-        ///We highly recommend revalidating the upkeep in the performUpkeep function
-        (bool upKeepNeeded, ) = checkUpkeep('');
-        if (!upKeepNeeded) {
+
+        //Recommended to rerevalidate the checkUpkeep in the performUpkeep function
+        // after callback
+        (bool canMakeRaffleDraw ) = canMakeRaffleDraw();
+
+        if (!canMakeRaffleDraw) {
             revert Raffle__UpkeepNotNeeded(
                 address(this).balance,
                 getNumberOfPlayers(),
                 uint256(s_raffleState)
             );
         }
-        // Will revert if subscription is not set and funded.
+
+        console.log('Starting raffle draw');
+        // Start raffle draw.
         s_raffleState = RAFFLE_STATE.CALCULATING_WINNER;
+        emit CalculatingWinner();
+
+        // Will revert if subscription is not set and funded.
         uint256 requestId = i_vrfCoordinator.requestRandomWords(
             i_gasLane,
             i_subscriptionId,
@@ -327,7 +342,18 @@ contract Raffle is
             VRF_NUM_WORDS
         );
 
+        console.log('requestId', requestId);
+
         emit RequestedRaffleWinner(requestId);
+    }
+
+    // Chainlink VRF Callback for getting the random number
+    function fulfillRandomWords(
+        uint256 requestId,
+        uint256[] memory randomWords
+    ) internal override {
+        console.log('fulfillRandomWords requestId', requestId, randomWords[0]);
+        pickWinner(randomWords);
     }
 
     // pure and views getters
@@ -361,12 +387,12 @@ contract Raffle is
         return VRF_REQUEST_CONFIRMATIONS;
     }
 
-    function getRaffleKeeperInterval() public view returns (uint256) {
-        return i_keepersUpdateInterval;
+    function getAutomationInterval() public view returns (uint256) {
+        return i_automationUpdateInterval;
     }
 
-    function getLastTimeStamp() public view returns (uint256) {
-        return s_lastTimeStamp;
+    function getLastDrawTimeStamp() public view returns (uint256) {
+        return s_lastDrawTimeStamp;
     }
 
     receive() external payable {}

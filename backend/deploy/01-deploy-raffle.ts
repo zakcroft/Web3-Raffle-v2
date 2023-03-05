@@ -19,11 +19,11 @@ const deployRaffle: DeployFunction = async function (
 
   const helperNetworkConfig = networkConfig[chainId as number] || {};
 
-  let vrfCoordinatorV2Address, subscriptionId;
+  let vrfCoordinatorV2Mock, vrfCoordinatorV2Address, subscriptionId;
 
   // mock vrfCoordinatorV2
   if (developmentChains.includes(network.name)) {
-    const vrfCoordinatorV2Mock = await ethers.getContract(
+     vrfCoordinatorV2Mock = await ethers.getContract(
       'VRFCoordinatorV2Mock',
     );
     vrfCoordinatorV2Address = vrfCoordinatorV2Mock.address;
@@ -35,11 +35,9 @@ const deployRaffle: DeployFunction = async function (
     // console.log('transactionReceipt===', transactionReceipt);
 
     subscriptionId = transactionReceipt.events[0].args.subId;
-    //console.log('subscriptionId===', subscriptionId.toString());
-    await vrfCoordinatorV2Mock.fundSubscription(
-      subscriptionId,
-      VRF_MOCK_FUND_AMOUNT,
-    );
+    console.log('subscriptionId===', subscriptionId.toString());
+
+
   } else {
     // using test and main network
     vrfCoordinatorV2Address = helperNetworkConfig['vrfCoordinator']!;
@@ -49,7 +47,7 @@ const deployRaffle: DeployFunction = async function (
   log('----------------------------------------------------');
   log('Deploying Raffle and waiting for confirmations...');
 
-  const { tokenCost, gasLane, callbackGasLimit, keepersUpdateInterval } =
+  const { tokenCost, gasLane, callbackGasLimit, automationUpdateInterval } =
     helperNetworkConfig;
 
   console.log('entranceFee', tokenCost?.toString());
@@ -74,7 +72,7 @@ const deployRaffle: DeployFunction = async function (
     tokenCost,
     gasLane,
     callbackGasLimit,
-    keepersUpdateInterval,
+    automationUpdateInterval,
   ];
 
   const raffleDeployObject = await deploy('Raffle', {
@@ -105,7 +103,7 @@ const deployRaffle: DeployFunction = async function (
     'RaffleToken',
     raffleTokenDeployObject.address,
   );
-  log(`raffleToken`, raffleTokenDeployed);
+  //log(`raffleToken`, raffleTokenDeployed);
 
   await raffleTokenDeployed.transfer(
     raffleDeployObject.address,
@@ -125,19 +123,29 @@ const deployRaffle: DeployFunction = async function (
   log(`ownerBalance`, ownerBalance.toString());
   log(`raffleBalance`, raffleBalance.toString());
 
-  // await deployments.all('VRFCoordinatorV2Mock:');
-  // const rt = await deployments.get('RaffleToken');
-  const localhostDeploy = await deploy('RaffleToken2', {
-    from: deployer,
-    contract: 'RaffleToken',
-    args: [_MAX_COINS],
-  });
-  //log(`localhostDeploy`, localhostDeploy);
-  log(`deployer`, deployer.deploy);
 
-  // const t = await deployments.get('RaffleToken');
-  // const r = await deployments.get('Raffle');
-  // await RaffleToken.deployed();
+  const raffle = await ethers.getContract(
+    'Raffle'
+  );
+
+  if (developmentChains.includes(network.name)) {
+    await vrfCoordinatorV2Mock.addConsumer(
+      subscriptionId,
+      raffle.address
+    )
+
+    const added = await vrfCoordinatorV2Mock.consumerIsAdded(
+      subscriptionId,
+      raffle.address
+    )
+    log(`raffle`, raffle.address);
+    log(`added Consumer`, added);
+
+    await vrfCoordinatorV2Mock.fundSubscription(
+      subscriptionId,
+      VRF_MOCK_FUND_AMOUNT,
+    );
+  }
 
   if (
     !developmentChains.includes(network.name) &&
@@ -146,7 +154,8 @@ const deployRaffle: DeployFunction = async function (
     await verify(raffleDeployObject.address, args);
   }
 
-  log(`Verifying done for Raffle... ${raffleDeployObject.address}`);
+  log(`Verifying done for raffleDeployObject... ${raffleDeployObject.address}`);
+  log(` Raffle... ${raffle.address}`);
 };
 
 export default deployRaffle;

@@ -11,6 +11,7 @@ contract Events {
 
     event Log(address addr, uint256 amount, string msg);
 
+    event CalculatingWinner();
     event RequestedRaffleWinner(uint256 indexed requestId);
 
     event RaffleEnter(address indexed player);
@@ -18,7 +19,6 @@ contract Events {
 
     event EnteredRaffle(address player, uint256 amount);
 
-    event CalculatingWinner();
     event WinningsSent(address indexed winner, uint256 indexed amountWon);
     event RaffleFeeSent(address indexed winner, uint256 indexed raffeFee);
 }
