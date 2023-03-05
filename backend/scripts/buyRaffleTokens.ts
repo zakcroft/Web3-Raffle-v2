@@ -28,30 +28,6 @@ async function buyRaffleTokens() {
 
   const tokenBalance = await raffleToken.balanceOf(player);
   console.log('RaffleToken contract balance:', tokenBalance.toString());
-
-  const amountToEnter = BigNumber.from('3');
-
-  // Approve the raffle to spend the tokens
-  await raffleToken.increaseAllowance(raffle.address, amountToEnter.toString());
-
-  const allowanceSet = await raffleToken.allowance(player, raffle.address);
-
-  await raffle.enterRaffle(amountToEnter);
-
-  console.log(
-    'Entered Raffle contract with',
-    allowanceSet.toString(),
-    'token(s)',
-  );
-
-  const tokenBalanceAfterAllowances = await raffleToken.balanceOf(player);
-  console.log(
-    'New RaffleToken contract balance:',
-    tokenBalanceAfterAllowances.toString(),
-  );
-
-  const raffleBalance = await raffle.getPlayerBalance(player);
-  console.log('Updated Raffle contract balance:', raffleBalance.toString());
 }
 
 buyRaffleTokens()

@@ -39,8 +39,8 @@ error Raffle__UpkeepNotNeeded(
 contract Raffle is Ownable, Events, VRFConsumerBaseV2, AutomationCompatible {
     enum RAFFLE_STATE {
         OPEN,
-        CLOSED,
-        CALCULATING_WINNER
+        CALCULATING_WINNER,
+        CLOSED
     }
     RAFFLE_STATE private s_raffleState;
     RaffleToken public token;
