@@ -15,7 +15,7 @@ interface NetworkConfigType {
   [key: number]: networkConfigItem;
 }
 
-const tokenCost =  ethers.utils.parseUnits("1000000", "gwei");
+const tokenCost =  ethers.utils.parseUnits("0.1", "ether");
 
 const networkConfig: NetworkConfigType = {
   31337: {

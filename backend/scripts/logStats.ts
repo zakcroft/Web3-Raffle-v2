@@ -8,28 +8,44 @@ export async function logStats(msg?: string) {
   const raffle = await ethers.getContract('Raffle', owner);
   const raffleToken = await ethers.getContract('RaffleToken', owner);
 
-  console.log(msg, ':STATS =======================================================');
+  const format = (v:string) => {
+    const units = ethers.utils.formatUnits(v, 'ether').toString()
+    return ethers.utils.commify(units)
+  }
+  const getBalance = async (address:string) => {
+    const v = (await ethers.provider.getBalance(address)).toString()
+    return format(v)
+  }
 
-  // Token
-  console.log('=== RaffleToken ===');
-  console.log('RaffleToken address balance', (await ethers.provider.getBalance(raffle.address)).toString());
-  console.log('Owner RaffleToken balance:', (await raffleToken.balanceOf(owner)).toString());
-  console.log('Player RaffleToken balance:', (await raffleToken.balanceOf(player)).toString());
+  console.log('*******************************************************************');
+  console.log(msg, 'BELOW :STATS =======================================================');
 
-  // Raffle
-  console.log('=== Raffle ===');
-  console.log('Raffle state', (await raffle.getRaffleState()).toString());
-  console.log('Raffle address balance', (await ethers.provider.getBalance(raffle.address)).toString());
-  console.log('Raffle player balance', (await raffle.getPlayerBalance(player)).toString());
+  //console.log('Game ID', (await getBalance(owner)).toString());
 
   // Owner and player
   console.log('=== Owner and player ===');
   console.log('Owner address', owner);
-  console.log('Owner address balance', (await ethers.provider.getBalance(owner)).toString());
+  console.log('Owner balance', (await getBalance(owner)).toString());
   console.log('Player address', player);
-  console.log('Player address balance', (await ethers.provider.getBalance(player)).toString());
+  console.log('Player balance', (await getBalance(player)).toString());
+
+  // Token
+  console.log('=== RaffleToken ===');
+  console.log('RaffleToken address balance', (await getBalance(raffleToken.address)).toString());
+  console.log('Owner RaffleToken balance:', (await raffleToken.balanceOf(owner)).toString());
+  console.log('Player RaffleToken balance:', (await raffleToken.balanceOf(player)).toString());
+
+  console.log('Token Cost ETH', format((await raffle.getTokenCost()).toString()));
+
+  // Raffle
+  console.log('=== Raffle ===');
+  console.log('Raffle state', (await raffle.getRaffleState()).toString());
+  console.log('Raffle address balance', (await getBalance(raffle.address)).toString());
+  console.log('Raffle player balance', (await raffle.getPlayerBalance(player)).toString());
+
 
   console.log('END ==============================================================');
+  console.log('*******************************************************************');
 }
 
 // logStats()

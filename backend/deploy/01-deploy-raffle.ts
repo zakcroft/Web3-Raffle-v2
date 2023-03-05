@@ -4,6 +4,7 @@ import { DeployFunction } from 'hardhat-deploy/types';
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
 
 import { verify } from '../utils/verify';
+import { logStats } from "../scripts/logStats";
 
 const deployRaffle: DeployFunction = async function (
   hre: HardhatRuntimeEnvironment,
@@ -15,7 +16,7 @@ const deployRaffle: DeployFunction = async function (
   const chainId = network.config.chainId;
   const VRF_MOCK_FUND_AMOUNT = '1000000000000000000000';
 
-  console.log('NETWORK ++++', network.name);
+  console.log('NETWORK', network.name);
 
   const helperNetworkConfig = networkConfig[chainId as number] || {};
 
@@ -28,12 +29,7 @@ const deployRaffle: DeployFunction = async function (
 
     const transactionResponse = await vrfCoordinatorV2Mock.createSubscription();
     const transactionReceipt = await transactionResponse.wait();
-
-    // console.log('transactionResponse===', transactionResponse);
-    // console.log('transactionReceipt===', transactionReceipt);
-
     subscriptionId = transactionReceipt.events[0].args.subId;
-    console.log('subscriptionId===', subscriptionId.toString());
   } else {
     // using test and main network
     vrfCoordinatorV2Address = helperNetworkConfig['vrfCoordinator']!;
@@ -41,12 +37,10 @@ const deployRaffle: DeployFunction = async function (
   }
 
   log('----------------------------------------------------');
-  log('Deploying Raffle and waiting for confirmations...');
 
   const { tokenCost, gasLane, callbackGasLimit, automationUpdateInterval } =
     helperNetworkConfig;
 
-  console.log('entranceFee', tokenCost?.toString());
   const _MAX_COINS = 1000000;
   const _INIT_SALES_ALLOCATION = 1000;
 
@@ -58,7 +52,6 @@ const deployRaffle: DeployFunction = async function (
     // @ts-ignore
     waitConfirmations: network.config.blockConfirmations || 1,
   });
-  log(`RaffleToken deployed at ${raffleTokenDeployObject.address}`);
 
   // RAFFLE
   const args = [
@@ -99,25 +92,11 @@ const deployRaffle: DeployFunction = async function (
     'RaffleToken',
     raffleTokenDeployObject.address,
   );
-  //log(`raffleToken`, raffleTokenDeployed);
 
   await raffleTokenDeployed.transfer(
     raffleDeployObject.address,
     _INIT_SALES_ALLOCATION,
   );
-  log(
-    `raffleToken.transfer to raffle _INIT_SALES_ALLOCATION ...`,
-    raffleDeployObject.address,
-    _INIT_SALES_ALLOCATION,
-  );
-
-  log(`deployer`, deployer);
-  const ownerBalance = await raffleTokenDeployed.balanceOf(deployer);
-  const raffleBalance = await raffleTokenDeployed.balanceOf(
-    raffleDeployObject.address,
-  );
-  log(`ownerBalance`, ownerBalance.toString());
-  log(`raffleBalance`, raffleBalance.toString());
 
   const raffle = await ethers.getContract('Raffle');
 
@@ -128,8 +107,7 @@ const deployRaffle: DeployFunction = async function (
       subscriptionId,
       raffle.address,
     );
-    log(`raffle`, raffle.address);
-    log(`added Consumer`, added);
+    log(`Consumer added`, added);
 
     await vrfCoordinatorV2Mock.fundSubscription(
       subscriptionId,
@@ -144,8 +122,7 @@ const deployRaffle: DeployFunction = async function (
     await verify(raffleDeployObject.address, args);
   }
 
-  log(`Verifying done for raffleDeployObject... ${raffleDeployObject.address}`);
-  log(` Raffle... ${raffle.address}`);
+  await logStats('END OF DEPLOYMENT');
 };
 
 export default deployRaffle;

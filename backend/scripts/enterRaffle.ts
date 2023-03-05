@@ -10,7 +10,7 @@ async function enterRaffle() {
   const raffle = await ethers.getContract('Raffle', player);
   const raffleToken = await ethers.getContract('RaffleToken', player);
 
-  const amountToEnter = BigNumber.from('3');
+  const amountToEnter = BigNumber.from('10');
 
   // Approve the raffle to spend the tokens
   await raffleToken.increaseAllowance(raffle.address, amountToEnter.toString());

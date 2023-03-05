@@ -350,6 +350,10 @@ contract Raffle is Ownable, Events, VRFConsumerBaseV2, AutomationCompatible {
     }
 
     // pure and views getters
+
+    function getGameID() public view returns (uint256) {
+        return i_gameID;
+    }
     function getTokenCost() public view returns (uint256) {
         return i_tokenCost;
     }

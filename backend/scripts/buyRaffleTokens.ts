@@ -15,8 +15,8 @@ async function buyRaffleTokens() {
   const tokenCost = await raffle.getTokenCost();
   console.log('Token Cost ETH', ethers.utils.formatEther(tokenCost.toString()));
 
-  // buy 5 tokens
-  const amountToBuy = 5;
+  // buy tokens
+  const amountToBuy = 20;
   const tokensToBuy = BigNumber.from(tokenCost.mul(amountToBuy));
   await raffle.buyRaffleTokens({ value: tokensToBuy });
 
