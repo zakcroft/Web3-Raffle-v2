@@ -17,19 +17,17 @@ async function buyRaffleTokens() {
   console.log('Token Cost ETH', ethers.utils.formatEther(tokenCost.toString()));
 
   // buy 5 tokens
-  const tokensToBuy = BigNumber.from(tokenCost.mul(5));
+  const amountToBuy = 5;
+  const tokensToBuy = BigNumber.from(tokenCost.mul(amountToBuy));
   await raffle.buyRaffleTokens({ value: tokensToBuy });
 
   console.log(
-    'Bought Raffle Tokens Cost ETH:',
+    `Bought ${amountToBuy} Raffle Tokens Cost ETH:`,
     ethers.utils.formatEther(tokensToBuy.toString()),
   );
 
   const tokenBalance = await raffleToken.balanceOf(player);
-  console.log(
-    'New Token balance:',
-    tokenBalance.toString(),
-  );
+  console.log('RaffleToken contract balance:', tokenBalance.toString());
 
   const amountToEnter = BigNumber.from('3');
 
@@ -40,7 +38,20 @@ async function buyRaffleTokens() {
 
   await raffle.enterRaffle(amountToEnter);
 
-  console.log('Entered Raffle with', allowanceSet.toString(), 'token(s)');
+  console.log(
+    'Entered Raffle contract with',
+    allowanceSet.toString(),
+    'token(s)',
+  );
+
+  const tokenBalanceAfterAllowances = await raffleToken.balanceOf(player);
+  console.log(
+    'New RaffleToken contract balance:',
+    tokenBalanceAfterAllowances.toString(),
+  );
+
+  const raffleBalance = await raffle.getPlayerBalance(player);
+  console.log('Updated Raffle contract balance:', raffleBalance.toString());
 }
 
 buyRaffleTokens()

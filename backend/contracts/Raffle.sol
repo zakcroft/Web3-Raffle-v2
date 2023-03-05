@@ -216,10 +216,10 @@ contract Raffle is Ownable, Events, VRFConsumerBaseV2, AutomationCompatible {
             setPlayer(msg.sender, raffleTokensAmountToEnter);
         }
 
-        console.log('ENTERED with', getPlayers().get(msg.sender));
+        console.log('New Balance', getPlayers().get(msg.sender));
 
         uint256 newPlayerBalance = token.balanceOf(msg.sender);
-        console.log('newPlayerBalance', newPlayerBalance);
+        console.log('raffleToken balance', newPlayerBalance);
         uint256 newAllowance = token.allowance(msg.sender, address(this));
         console.log('newAllowance', newAllowance);
         emit EnteredRaffle(msg.sender, getPlayers().get(msg.sender));
@@ -357,6 +357,14 @@ contract Raffle is Ownable, Events, VRFConsumerBaseV2, AutomationCompatible {
     function getPlayer(uint256 i) public view returns (address) {
         (address player, uint256 amount) = getPlayers().at(i);
         return player;
+    }
+
+    function getPlayerBalance(address player) public view returns (uint256) {
+        EnumerableMap.AddressToUintMap storage players = getPlayers();
+        if (players.contains(player)) {
+            return players.get(player);
+        }
+        return 0;
     }
 
     function getNumberOfPlayers() public view returns (uint256) {
