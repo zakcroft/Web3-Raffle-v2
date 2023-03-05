@@ -153,6 +153,8 @@ contract Raffle is Ownable, Events, VRFConsumerBaseV2, AutomationCompatible {
 
         uint256 amountToBuy = msg.value.div(i_tokenCost);
 
+        console.log('amountToBuy: %s', amountToBuy);
+
         // Make sure we are buying whole tokens
         if (amountToBuy.mod(i_tokenCost) == 0) {
             revert Raffle__CannotBuyPartialTokens();
@@ -224,9 +226,7 @@ contract Raffle is Ownable, Events, VRFConsumerBaseV2, AutomationCompatible {
     }
 
     // TODO calldata or memory?
-    function pickWinner(
-        uint256[] memory randomWords
-    ) public returns (uint256) {
+    function pickWinner(uint256[] memory randomWords) public returns (uint256) {
         console.log('randomWords', randomWords[0]);
         console.log('getNumberOfPlayers', getNumberOfPlayers());
 
@@ -236,13 +236,10 @@ contract Raffle is Ownable, Events, VRFConsumerBaseV2, AutomationCompatible {
         console.log('indexOfWinner', indexOfWinner);
         (address lastWinner, uint256 amount) = getPlayers().at(indexOfWinner);
 
-
         s_raffleState = RAFFLE_STATE.CLOSED;
         console.log('Raffle Closed');
         console.log('lastWinner', lastWinner, amount);
         s_lastWinner = lastWinner;
-
-
 
         //TAKE 10% FEE
         uint256 pot = address(this).balance;
@@ -279,18 +276,17 @@ contract Raffle is Ownable, Events, VRFConsumerBaseV2, AutomationCompatible {
     {
         bool isOpen = RAFFLE_STATE.OPEN == s_raffleState;
 
-        bool timePassed = (block.timestamp - getLastDrawTimeStamp()) >
-            i_automationUpdateInterval;
-
+        bool timePassed = isEnoughTimePassedToDraw();
         bool hasPLayers = getNumberOfPlayers() > 0;
-
         bool hasBalance = address(this).balance > 0;
-
         triggerRaffleDaw = (timePassed && isOpen && hasBalance && hasBalance);
 
         console.log('block.timestamp', block.timestamp);
         console.log('getLastTimeStamp()', getLastDrawTimeStamp());
-        console.log('block.timestamp - getLastTimeStamp()', block.timestamp - getLastDrawTimeStamp());
+        console.log(
+            'block.timestamp - getLastTimeStamp()',
+            block.timestamp - getLastDrawTimeStamp()
+        );
         console.log('timePassed', timePassed);
         console.log('isOpen', isOpen);
         console.log('hasPLayers', hasPLayers);
@@ -315,10 +311,9 @@ contract Raffle is Ownable, Events, VRFConsumerBaseV2, AutomationCompatible {
 
     // performData can be used to pass in data to the performUpkeep function
     function performUpkeep(bytes calldata performData) external override {
-
         //Recommended to rerevalidate the checkUpkeep in the performUpkeep function
         // after callback
-        (bool canMakeRaffleDraw ) = canMakeRaffleDraw();
+        bool canMakeRaffleDraw = canMakeRaffleDraw();
 
         if (!canMakeRaffleDraw) {
             revert Raffle__UpkeepNotNeeded(
@@ -341,8 +336,6 @@ contract Raffle is Ownable, Events, VRFConsumerBaseV2, AutomationCompatible {
             i_callbackGasLimit,
             VRF_NUM_WORDS
         );
-
-        console.log('requestId', requestId);
 
         emit RequestedRaffleWinner(requestId);
     }
@@ -393,6 +386,20 @@ contract Raffle is Ownable, Events, VRFConsumerBaseV2, AutomationCompatible {
 
     function getLastDrawTimeStamp() public view returns (uint256) {
         return s_lastDrawTimeStamp;
+    }
+
+    function getNextDrawTimeStamp() public view returns (uint256) {
+        return block.timestamp + getAutomationInterval();
+    }
+
+    function getCountDownToDrawTimeStamp() public view returns (uint256) {
+        return getNextDrawTimeStamp() - getLastDrawTimeStamp();
+    }
+
+    function isEnoughTimePassedToDraw() public view returns (bool) {
+        return
+            (block.timestamp - getLastDrawTimeStamp()) >
+            i_automationUpdateInterval;
     }
 
     receive() external payable {}

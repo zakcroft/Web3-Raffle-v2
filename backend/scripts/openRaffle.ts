@@ -7,7 +7,7 @@ async function openRaffle() {
   console.log('Opening raffle');
 
   const raffle = await ethers.getContract('Raffle', owner);
- await raffle.openRaffle();
+  await raffle.openRaffle();
 
   console.log('Raffle open');
 }

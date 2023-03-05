@@ -7,30 +7,40 @@ async function buyRaffleTokens() {
   const owner = accounts.deployer;
   const player = accounts.player;
 
-  const raffle = await ethers.getContract('Raffle', player);
+  console.log('Raffle contract owner', owner);
+  console.log('Player buying RaffleTokens', player);
 
+  const raffle = await ethers.getContract('Raffle', player);
   const raffleToken = await ethers.getContract('RaffleToken', player);
 
-  console.log('buyRaffleTokens');
   const tokenCost = await raffle.getTokenCost();
-  console.log('tokenCost!', tokenCost.toString());
+  console.log('Token Cost ETH', ethers.utils.formatEther(tokenCost.toString()));
 
-  // buy 10 tokens
-  const tokensToBuy = BigNumber.from(tokenCost.mul(10));
+  // buy 5 tokens
+  const tokensToBuy = BigNumber.from(tokenCost.mul(5));
   await raffle.buyRaffleTokens({ value: tokensToBuy });
-  console.log('Bought Raffle Tokens', tokensToBuy.toString());
+
+  console.log(
+    'Bought Raffle Tokens Cost ETH:',
+    ethers.utils.formatEther(tokensToBuy.toString()),
+  );
+
+  const tokenBalance = await raffleToken.balanceOf(player);
+  console.log(
+    'New Token balance:',
+    tokenBalance.toString(),
+  );
 
   const amountToEnter = BigNumber.from('3');
-  console.log('owner', owner);
-  console.log('player', player);
 
-  // approve the raffle to spend the tokens
+  // Approve the raffle to spend the tokens
   await raffleToken.increaseAllowance(raffle.address, amountToEnter.toString());
 
   const allowanceSet = await raffleToken.allowance(player, raffle.address);
 
   await raffle.enterRaffle(amountToEnter);
-  console.log('Entered Raffle with ', allowanceSet.toString(), ' token(s)');
+
+  console.log('Entered Raffle with', allowanceSet.toString(), 'token(s)');
 }
 
 buyRaffleTokens()

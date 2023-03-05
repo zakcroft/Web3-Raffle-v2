@@ -6,23 +6,27 @@ import { Raffle, VRFCoordinatorV2Mock } from '../typechain-types';
 
 async function mockKeepers() {
   const raffle: Raffle = await ethers.getContract('Raffle');
-  console.log('mockKeepers raffle.address=====', raffle.address)
+  console.log('Running mockKeepers with raffle.address', raffle.address);
   const checkData = ethers.utils.keccak256(ethers.utils.toUtf8Bytes(''));
   const { triggerRaffleDaw } = await raffle.callStatic.checkUpkeep(checkData);
   if (triggerRaffleDaw) {
     const tx = await raffle.performUpkeep(checkData);
     const txReceipt = await tx.wait(1);
 
-    //console.log('txReceipt.events![1]',txReceipt.events![2]);
-
     const requestId = txReceipt.events![2].args!.requestId;
-
     console.log(`Performed upkeep with RequestId: ${requestId}`);
+
     if (network.config.chainId == 31337) {
       await mockVrf(requestId, raffle);
     }
   } else {
-    console.log('No upkeep needed!');
+    console.log('Not enough time has passed');
+    console.log('Last draw', (await raffle.getLastDrawTimeStamp()).toString());
+    console.log('Next draw', (await raffle.getNextDrawTimeStamp()).toString());
+    console.log(
+      'Difference',
+      (await raffle.getCountDownToDrawTimeStamp()).toString(),
+    );
   }
 }
 

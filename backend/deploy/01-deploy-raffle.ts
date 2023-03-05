@@ -23,9 +23,7 @@ const deployRaffle: DeployFunction = async function (
 
   // mock vrfCoordinatorV2
   if (developmentChains.includes(network.name)) {
-     vrfCoordinatorV2Mock = await ethers.getContract(
-      'VRFCoordinatorV2Mock',
-    );
+    vrfCoordinatorV2Mock = await ethers.getContract('VRFCoordinatorV2Mock');
     vrfCoordinatorV2Address = vrfCoordinatorV2Mock.address;
 
     const transactionResponse = await vrfCoordinatorV2Mock.createSubscription();
@@ -36,8 +34,6 @@ const deployRaffle: DeployFunction = async function (
 
     subscriptionId = transactionReceipt.events[0].args.subId;
     console.log('subscriptionId===', subscriptionId.toString());
-
-
   } else {
     // using test and main network
     vrfCoordinatorV2Address = helperNetworkConfig['vrfCoordinator']!;
@@ -123,21 +119,15 @@ const deployRaffle: DeployFunction = async function (
   log(`ownerBalance`, ownerBalance.toString());
   log(`raffleBalance`, raffleBalance.toString());
 
-
-  const raffle = await ethers.getContract(
-    'Raffle'
-  );
+  const raffle = await ethers.getContract('Raffle');
 
   if (developmentChains.includes(network.name)) {
-    await vrfCoordinatorV2Mock.addConsumer(
-      subscriptionId,
-      raffle.address
-    )
+    await vrfCoordinatorV2Mock.addConsumer(subscriptionId, raffle.address);
 
     const added = await vrfCoordinatorV2Mock.consumerIsAdded(
       subscriptionId,
-      raffle.address
-    )
+      raffle.address,
+    );
     log(`raffle`, raffle.address);
     log(`added Consumer`, added);
 
