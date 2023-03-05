@@ -2,16 +2,15 @@ import { ethers, getNamedAccounts } from 'hardhat';
 
 import { BigNumber } from 'ethers';
 
+import { logStats } from './logStats';
+
 async function buyRaffleTokens() {
   const accounts = await getNamedAccounts();
-  const owner = accounts.deployer;
   const player = accounts.player;
 
-  console.log('Raffle contract owner', owner);
-  console.log('Player buying RaffleTokens', player);
+  await logStats('START OF BUY RAFFLE TOKENS');
 
   const raffle = await ethers.getContract('Raffle', player);
-  const raffleToken = await ethers.getContract('RaffleToken', player);
 
   const tokenCost = await raffle.getTokenCost();
   console.log('Token Cost ETH', ethers.utils.formatEther(tokenCost.toString()));
@@ -26,8 +25,7 @@ async function buyRaffleTokens() {
     ethers.utils.formatEther(tokensToBuy.toString()),
   );
 
-  const tokenBalance = await raffleToken.balanceOf(player);
-  console.log('RaffleToken contract balance:', tokenBalance.toString());
+  await logStats('END OF BUY RAFFLE TOKENS')
 }
 
 buyRaffleTokens()

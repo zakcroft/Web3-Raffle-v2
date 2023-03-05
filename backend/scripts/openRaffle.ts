@@ -1,4 +1,5 @@
 import { ethers, getNamedAccounts } from 'hardhat';
+import { logStats } from './logStats';
 
 async function openRaffle() {
   const accounts = await getNamedAccounts();
@@ -8,6 +9,8 @@ async function openRaffle() {
 
   const raffle = await ethers.getContract('Raffle', owner);
   await raffle.openRaffle();
+
+  await logStats();
 
   console.log('Raffle open');
 }
