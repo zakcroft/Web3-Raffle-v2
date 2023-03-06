@@ -350,9 +350,8 @@ contract Raffle is Ownable, Events, VRFConsumerBaseV2, AutomationCompatible {
     }
 
     // pure and views getters
-
     function getGameID() public view returns (uint256) {
-        return i_gameID;
+        return s_gameID;
     }
     function getTokenCost() public view returns (uint256) {
         return i_tokenCost;
@@ -384,14 +383,6 @@ contract Raffle is Ownable, Events, VRFConsumerBaseV2, AutomationCompatible {
         return s_raffleState;
     }
 
-    function getNumWords() public pure returns (uint256) {
-        return VRF_NUM_WORDS;
-    }
-
-    function getRequestConfirmations() public pure returns (uint256) {
-        return VRF_REQUEST_CONFIRMATIONS;
-    }
-
     function getAutomationInterval() public view returns (uint256) {
         return i_automationUpdateInterval;
     }
@@ -412,6 +403,14 @@ contract Raffle is Ownable, Events, VRFConsumerBaseV2, AutomationCompatible {
         return
             (block.timestamp - getLastDrawTimeStamp()) >
             i_automationUpdateInterval;
+    }
+
+    function getNumWords() public pure returns (uint256) {
+        return VRF_NUM_WORDS;
+    }
+
+    function getRequestConfirmations() public pure returns (uint256) {
+        return VRF_REQUEST_CONFIRMATIONS;
     }
 
     receive() external payable {}
