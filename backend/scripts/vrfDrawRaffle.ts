@@ -28,6 +28,12 @@ async function mockKeepers() {
       'Difference',
       (await raffle.getCountDownToDrawTimeStamp()).toString(),
     );
+    const currentBlock = await ethers.provider.getBlockNumber();
+    const blockTimestamp = (await ethers.provider.getBlock(currentBlock)).timestamp;
+    console.log(blockTimestamp);
+    const date = new Date(blockTimestamp * 1000); // Date requires ms, whereas block.timestamp is in s
+    console.log('blockTimestamp',blockTimestamp)
+    console.log('blockTimes',date)
   }
 }
 

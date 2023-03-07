@@ -18,7 +18,7 @@ const deployRaffle: DeployFunction = async function (
 
   console.log('NETWORK', network.name);
 
-  const helperNetworkConfig = networkConfig[chainId as number] || {};
+  const helperNetworkConfig = networkConfig[chainId as number];
 
   let vrfCoordinatorV2Mock, vrfCoordinatorV2Address, subscriptionId;
 
@@ -53,9 +53,12 @@ const deployRaffle: DeployFunction = async function (
     waitConfirmations: network.config.blockConfirmations || 1,
   });
 
+  const raffleNFT = await get('RaffleNFT');
+
   // RAFFLE
   const args = [
     raffleTokenDeployObject.address,
+    raffleNFT.address,
     vrfCoordinatorV2Address,
     subscriptionId,
     tokenCost,

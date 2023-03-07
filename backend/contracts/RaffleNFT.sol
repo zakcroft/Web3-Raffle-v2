@@ -4,7 +4,9 @@ pragma solidity ^0.8.8;
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 
-contract BasicNft is ERC721URIStorage {
+import 'hardhat/console.sol';
+
+contract RaffleNFT is ERC721URIStorage {
     using Counters for Counters.Counter;
     Counters.Counter private s_tokenCounter;
     string public constant TOKEN_URI =
@@ -14,6 +16,7 @@ contract BasicNft is ERC721URIStorage {
     }
 
     function mintNft() public {
+        console.log('mint msg.sender)', msg.sender);
         _safeMint(msg.sender, s_tokenCounter.current());
         s_tokenCounter.increment();
     }

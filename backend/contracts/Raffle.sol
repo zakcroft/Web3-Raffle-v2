@@ -14,6 +14,7 @@ import '@chainlink/contracts/src/v0.8/AutomationCompatible.sol';
 import 'hardhat/console.sol';
 
 import './Events.sol';
+import './RaffleNFT.sol';
 import './RaffleToken.sol';
 
 error Raffle__TransferFailed();
@@ -42,20 +43,21 @@ contract Raffle is Ownable, Events, VRFConsumerBaseV2, AutomationCompatible {
         CALCULATING_WINNER,
         CLOSED
     }
-    RAFFLE_STATE private s_raffleState;
-    RaffleToken public token;
-
     // can be used but not needed for solidity > 0.8+
     using SafeMath for uint256;
     using EnumerableMap for EnumerableMap.AddressToUintMap;
 
-    /* State vars */
+    RaffleToken public token;
+    RaffleNFT public raffleNFT;
+    RAFFLE_STATE private s_raffleState;
     uint256 private immutable i_tokenCost;
     mapping(uint256 => EnumerableMap.AddressToUintMap) private s_games_players;
     uint256 private s_gameID = 0;
+    address private s_owner;
+    address private s_lastWinner;
+    uint256 private s_lastDrawTimeStamp;
+    uint256 private i_automationUpdateInterval;
 
-    /* State variables */
-    // Chainlink VRF Variables
     VRFCoordinatorV2Interface private immutable i_vrfCoordinator;
     bytes32 private i_gasLane;
     uint64 private i_subscriptionId;
@@ -63,15 +65,9 @@ contract Raffle is Ownable, Events, VRFConsumerBaseV2, AutomationCompatible {
     uint32 private i_callbackGasLimit;
     uint32 private constant VRF_NUM_WORDS = 1;
 
-    // raffle variables
-    uint256 private constant _PRIZE_FUND = 1000;
-    address private s_owner;
-    address private s_lastWinner;
-    uint256 private s_lastDrawTimeStamp;
-    uint256 private i_automationUpdateInterval;
-
     constructor(
         address tokenAddress,
+        address raffleNFTAddress,
         address vrfCoordinatorV2,
         uint64 subscriptionId,
         uint256 tokenCost,
@@ -80,6 +76,7 @@ contract Raffle is Ownable, Events, VRFConsumerBaseV2, AutomationCompatible {
         uint256 automationUpdateInterval
     ) VRFConsumerBaseV2(vrfCoordinatorV2) {
         token = RaffleToken(tokenAddress);
+        raffleNFT = RaffleNFT(raffleNFTAddress);
         s_owner = msg.sender;
         i_vrfCoordinator = VRFCoordinatorV2Interface(vrfCoordinatorV2);
         i_subscriptionId = subscriptionId;
@@ -238,13 +235,17 @@ contract Raffle is Ownable, Events, VRFConsumerBaseV2, AutomationCompatible {
 
         s_raffleState = RAFFLE_STATE.CLOSED;
         console.log('Raffle Closed');
-        console.log('lastWinner', lastWinner, amount);
+
         s_lastWinner = lastWinner;
+
+        console.log('s_lastWinner', s_lastWinner, amount);
 
         //TAKE 10% FEE
         uint256 pot = address(this).balance;
         uint256 winnings = pot.div(10).mul(9);
         uint256 raffleFee = pot.div(10).mul(1);
+
+        raffleNFT.mintNft();
 
         console.log('pot', pot);
         console.log('winnings', winnings);
@@ -281,16 +282,6 @@ contract Raffle is Ownable, Events, VRFConsumerBaseV2, AutomationCompatible {
         bool hasBalance = address(this).balance > 0;
         triggerRaffleDaw = (timePassed && isOpen && hasBalance && hasBalance);
 
-        console.log('block.timestamp', block.timestamp);
-        console.log('getLastTimeStamp()', getLastDrawTimeStamp());
-        console.log(
-            'block.timestamp - getLastTimeStamp()',
-            block.timestamp - getLastDrawTimeStamp()
-        );
-        console.log('timePassed', timePassed);
-        console.log('isOpen', isOpen);
-        console.log('hasPLayers', hasPLayers);
-        console.log('hasBalance', hasBalance);
         console.log('triggerRaffleDaw', triggerRaffleDaw);
 
         return triggerRaffleDaw;
@@ -392,11 +383,14 @@ contract Raffle is Ownable, Events, VRFConsumerBaseV2, AutomationCompatible {
     }
 
     function getNextDrawTimeStamp() public view returns (uint256) {
-        return block.timestamp + getAutomationInterval();
+        return getLastDrawTimeStamp() + getAutomationInterval();
     }
 
     function getCountDownToDrawTimeStamp() public view returns (uint256) {
-        return getNextDrawTimeStamp() - getLastDrawTimeStamp();
+        if(getNextDrawTimeStamp() > block.timestamp) {
+            return getNextDrawTimeStamp().sub(block.timestamp);
+        }
+        return 0;
     }
 
     function isEnoughTimePassedToDraw() public view returns (bool) {
