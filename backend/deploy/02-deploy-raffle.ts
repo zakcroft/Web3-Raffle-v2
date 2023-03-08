@@ -53,7 +53,8 @@ const deployRaffle: DeployFunction = async function (
     waitConfirmations: network.config.blockConfirmations || 1,
   });
 
-  const raffleNFT = await get('RaffleNFT');
+  const raffleNFT = await ethers.getContract('RaffleNFT');
+
 
   // RAFFLE
   const args = [
@@ -102,6 +103,10 @@ const deployRaffle: DeployFunction = async function (
   );
 
   const raffle = await ethers.getContract('Raffle');
+  raffleNFT.mintNft();
+
+  console.log('balanceOf', (await raffleNFT.balanceOf(deployer)).toString())
+  console.log('owner of', await raffleNFT.ownerOf('0'))
 
   if (developmentChains.includes(network.name)) {
     await vrfCoordinatorV2Mock.addConsumer(subscriptionId, raffle.address);

@@ -12,12 +12,12 @@ contract RaffleNFT is ERC721URIStorage {
     string public constant TOKEN_URI =
         "ipfs://bafybeifdj4gp7bxo4zd2jh6h6al4etoa3fcifhxgpk5pafquxxhevhut24/?filename=happy.json";
 
-    constructor() ERC721("Smile", "HAPPY WINNER") {
-    }
+    constructor() ERC721("Smile", "HAPPY WINNER") {}
 
     function mintNft() public {
-        console.log('mint msg.sender)', msg.sender);
+        console.log('mint msg.sender)', msg.sender, s_tokenCounter.current());
         _safeMint(msg.sender, s_tokenCounter.current());
+        console.log('mint msg.sender 222)', this.ownerOf(s_tokenCounter.current()));
         s_tokenCounter.increment();
     }
 

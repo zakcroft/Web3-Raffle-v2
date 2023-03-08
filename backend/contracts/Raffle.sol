@@ -219,6 +219,7 @@ contract Raffle is Ownable, Events, VRFConsumerBaseV2, AutomationCompatible {
         console.log('raffleToken balance', newPlayerBalance);
         uint256 newAllowance = token.allowance(msg.sender, address(this));
         console.log('newAllowance', newAllowance);
+
         emit EnteredRaffle(msg.sender, getPlayers().get(msg.sender));
     }
 
@@ -244,8 +245,10 @@ contract Raffle is Ownable, Events, VRFConsumerBaseV2, AutomationCompatible {
         uint256 pot = address(this).balance;
         uint256 winnings = pot.div(10).mul(9);
         uint256 raffleFee = pot.div(10).mul(1);
-
+        console.log('owner of', raffleNFT.ownerOf(0));
         raffleNFT.mintNft();
+        //console.log('balanceOf', raffleNFT.balanceOf('0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266'));
+        console.log('owner of', raffleNFT.ownerOf(1));
 
         console.log('pot', pot);
         console.log('winnings', winnings);
