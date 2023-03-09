@@ -1,4 +1,5 @@
 import { ethers, getNamedAccounts } from 'hardhat';
+
 import { logStats } from './logStats';
 
 async function openRaffle() {

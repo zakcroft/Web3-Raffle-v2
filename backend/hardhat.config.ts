@@ -13,6 +13,8 @@ import 'solidity-coverage';
 
 config({ path: '.env.local' });
 
+const useTestFolders = process.env.USE_TEST_FOLDERS || false;
+
 /**
  * @type import('hardhat/config').HardhatUserConfig
  */
@@ -69,4 +71,9 @@ module.exports = {
       default: 1,
     },
   },
+  paths:{
+    sources: useTestFolders ? 'test_contracts':'./contracts',
+    deploy: useTestFolders ? 'test_deploy':'deploy'
+  }
+
 };

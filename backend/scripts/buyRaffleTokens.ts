@@ -25,7 +25,7 @@ async function buyRaffleTokens() {
     ethers.utils.formatEther(tokensToBuy.toString()),
   );
 
-  await logStats('END OF BUY RAFFLE TOKENS')
+  await logStats('END OF BUY RAFFLE TOKENS');
 }
 
 buyRaffleTokens()

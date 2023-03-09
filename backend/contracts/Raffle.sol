@@ -11,6 +11,8 @@ import '@chainlink/contracts/src/v0.8/interfaces/VRFCoordinatorV2Interface.sol';
 
 import '@chainlink/contracts/src/v0.8/AutomationCompatible.sol';
 
+import '@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol';
+
 import 'hardhat/console.sol';
 
 import './Events.sol';
@@ -37,7 +39,13 @@ error Raffle__UpkeepNotNeeded(
     uint256 raffelState
 );
 
-contract Raffle is Ownable, Events, VRFConsumerBaseV2, AutomationCompatible {
+contract Raffle is
+    Ownable,
+    Events,
+    VRFConsumerBaseV2,
+    AutomationCompatible,
+    IERC721Receiver
+{
     enum RAFFLE_STATE {
         OPEN,
         CALCULATING_WINNER,
@@ -88,9 +96,22 @@ contract Raffle is Ownable, Events, VRFConsumerBaseV2, AutomationCompatible {
         i_automationUpdateInterval = automationUpdateInterval;
     }
 
+    function onERC721Received(
+        address operator,
+        address from,
+        uint256 tokenId,
+        bytes memory data
+    ) public returns (bytes4) {
+        // Implement your logic here
+        // Return the ERC721_RECEIVED value to indicate that the transfer was successful
+        return
+            bytes4(
+                keccak256('onERC721Received(address,address,uint256,bytes)')
+            );
+    }
+
     // modifiers
     modifier raffleIsOpen() {
-        console.log('s_raffleState: %s', uint(s_raffleState));
         if (s_raffleState != RAFFLE_STATE.OPEN) {
             revert Raffle__NotOpen();
         }
@@ -113,7 +134,6 @@ contract Raffle is Ownable, Events, VRFConsumerBaseV2, AutomationCompatible {
 
         s_gameID = s_gameID += 1;
         s_raffleState = RAFFLE_STATE.OPEN;
-        console.log('Raffle Open with gameID: %s', s_gameID);
     }
 
     function closeRaffle() public onlyOwner {
@@ -150,8 +170,6 @@ contract Raffle is Ownable, Events, VRFConsumerBaseV2, AutomationCompatible {
 
         uint256 amountToBuy = msg.value.div(i_tokenCost);
 
-        console.log('amountToBuy: %s', amountToBuy);
-
         // Make sure we are buying whole tokens
         if (amountToBuy.mod(i_tokenCost) == 0) {
             revert Raffle__CannotBuyPartialTokens();
@@ -180,21 +198,18 @@ contract Raffle is Ownable, Events, VRFConsumerBaseV2, AutomationCompatible {
         uint256 raffleTokensAmountToEnter
     ) external raffleIsOpen {
         // sent enough tokens to enter
-        console.log('raffleTokensAmountToEnter', raffleTokensAmountToEnter);
         if (raffleTokensAmountToEnter < 1) {
             revert Raffle__MinimumOneTokenToEnter();
         }
 
         // Check have bought some tokens
         uint256 playerBalance = token.balanceOf(msg.sender);
-        console.log('playerBalance', playerBalance);
         if (playerBalance <= 0) {
             revert Raffle__YouNeedToBuyMoreTokens();
         }
 
         // Check have approved the raffle contract to use there tokens
         uint256 allowance = token.allowance(msg.sender, address(this));
-        console.log('token.allowance', allowance);
         if (allowance <= 0) {
             revert Raffle__YouNeedToApproveRaffleTokens();
         }
@@ -213,25 +228,19 @@ contract Raffle is Ownable, Events, VRFConsumerBaseV2, AutomationCompatible {
             setPlayer(msg.sender, raffleTokensAmountToEnter);
         }
 
-        console.log('New Balance', getPlayers().get(msg.sender));
-
         uint256 newPlayerBalance = token.balanceOf(msg.sender);
-        console.log('raffleToken balance', newPlayerBalance);
         uint256 newAllowance = token.allowance(msg.sender, address(this));
-        console.log('newAllowance', newAllowance);
-
         emit EnteredRaffle(msg.sender, getPlayers().get(msg.sender));
+    }
+
+    function makeNFT() public {
+        raffleNFT.mintNft();
     }
 
     // TODO calldata or memory?
     function pickWinner(uint256[] memory randomWords) public returns (uint256) {
-        console.log('randomWords', randomWords[0]);
-        console.log('getNumberOfPlayers', getNumberOfPlayers());
-
         //calculating
         uint256 indexOfWinner = randomWords[0] % getNumberOfPlayers();
-
-        console.log('indexOfWinner', indexOfWinner);
         (address lastWinner, uint256 amount) = getPlayers().at(indexOfWinner);
 
         s_raffleState = RAFFLE_STATE.CLOSED;
@@ -239,20 +248,16 @@ contract Raffle is Ownable, Events, VRFConsumerBaseV2, AutomationCompatible {
 
         s_lastWinner = lastWinner;
 
-        console.log('s_lastWinner', s_lastWinner, amount);
-
         //TAKE 10% FEE
         uint256 pot = address(this).balance;
         uint256 winnings = pot.div(10).mul(9);
         uint256 raffleFee = pot.div(10).mul(1);
-        console.log('owner of', raffleNFT.ownerOf(0));
-        raffleNFT.mintNft();
-        //console.log('balanceOf', raffleNFT.balanceOf('0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266'));
-        console.log('owner of', raffleNFT.ownerOf(1));
 
-        console.log('pot', pot);
-        console.log('winnings', winnings);
-        console.log('raffleCut', raffleFee);
+        console.log('token s_owner()', token.s_owner());
+        console.log('s_owner()', raffleNFT.s_owner());
+        console.log('address', address(raffleNFT));
+
+        console.log('address', raffleNFT.ownerOf(0));
 
         // TODO check this is cheaper to transfer this way
         // or payable(s_lastWinner).transfer(address(this).balance * 1);
@@ -339,7 +344,6 @@ contract Raffle is Ownable, Events, VRFConsumerBaseV2, AutomationCompatible {
         uint256 requestId,
         uint256[] memory randomWords
     ) internal override {
-        console.log('fulfillRandomWords requestId', requestId, randomWords[0]);
         pickWinner(randomWords);
     }
 
@@ -347,6 +351,7 @@ contract Raffle is Ownable, Events, VRFConsumerBaseV2, AutomationCompatible {
     function getGameID() public view returns (uint256) {
         return s_gameID;
     }
+
     function getTokenCost() public view returns (uint256) {
         return i_tokenCost;
     }
@@ -390,7 +395,7 @@ contract Raffle is Ownable, Events, VRFConsumerBaseV2, AutomationCompatible {
     }
 
     function getCountDownToDrawTimeStamp() public view returns (uint256) {
-        if(getNextDrawTimeStamp() > block.timestamp) {
+        if (getNextDrawTimeStamp() > block.timestamp) {
             return getNextDrawTimeStamp().sub(block.timestamp);
         }
         return 0;

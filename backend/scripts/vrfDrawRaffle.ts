@@ -3,7 +3,7 @@ import { ethers, network } from 'hardhat';
 import { BigNumber } from 'ethers';
 
 import { Raffle, VRFCoordinatorV2Mock } from '../typechain-types';
-import { logStats } from "./logStats";
+import { logStats } from './logStats';
 
 async function mockKeepers() {
   const raffle: Raffle = await ethers.getContract('Raffle');
@@ -29,11 +29,12 @@ async function mockKeepers() {
       (await raffle.getCountDownToDrawTimeStamp()).toString(),
     );
     const currentBlock = await ethers.provider.getBlockNumber();
-    const blockTimestamp = (await ethers.provider.getBlock(currentBlock)).timestamp;
+    const blockTimestamp = (await ethers.provider.getBlock(currentBlock))
+      .timestamp;
     console.log(blockTimestamp);
     const date = new Date(blockTimestamp * 1000); // Date requires ms, whereas block.timestamp is in s
-    console.log('blockTimestamp',blockTimestamp)
-    console.log('blockTimes',date)
+    console.log('blockTimestamp', blockTimestamp);
+    console.log('blockTimes', date);
   }
 }
 

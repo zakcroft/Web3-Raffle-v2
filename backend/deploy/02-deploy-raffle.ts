@@ -3,8 +3,9 @@ import { network } from 'hardhat';
 import { DeployFunction } from 'hardhat-deploy/types';
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
 
+import { logStats } from '../scripts/logStats';
+
 import { verify } from '../utils/verify';
-import { logStats } from "../scripts/logStats";
 
 const deployRaffle: DeployFunction = async function (
   hre: HardhatRuntimeEnvironment,
@@ -53,8 +54,16 @@ const deployRaffle: DeployFunction = async function (
     waitConfirmations: network.config.blockConfirmations || 1,
   });
 
-  const raffleNFT = await ethers.getContract('RaffleNFT');
+  const raffleToken = await ethers.getContract('RaffleToken');
+  console.log('raffleToken s_owner()', await raffleToken.s_owner());
 
+  const raffleNFT = await ethers.getContract('RaffleNFT');
+  // raffleNFT.mintNft();
+  //
+  // console.log('raffleNFT balanceOf', (await raffleNFT.balanceOf(deployer)).toString())
+  // console.log('raffleNFT owner of 0', await raffleNFT.ownerOf('0'))
+  // console.log('raffleNFT s_owner()', await raffleNFT.s_owner())
+  // console.log('raffleNFT address', await raffleNFT.address)
 
   // RAFFLE
   const args = [
@@ -102,20 +111,9 @@ const deployRaffle: DeployFunction = async function (
     _INIT_SALES_ALLOCATION,
   );
 
-  const raffle = await ethers.getContract('Raffle');
-  raffleNFT.mintNft();
-
-  console.log('balanceOf', (await raffleNFT.balanceOf(deployer)).toString())
-  console.log('owner of', await raffleNFT.ownerOf('0'))
-
   if (developmentChains.includes(network.name)) {
+    const raffle = await ethers.getContract('Raffle');
     await vrfCoordinatorV2Mock.addConsumer(subscriptionId, raffle.address);
-
-    const added = await vrfCoordinatorV2Mock.consumerIsAdded(
-      subscriptionId,
-      raffle.address,
-    );
-    log(`Consumer added`, added);
 
     await vrfCoordinatorV2Mock.fundSubscription(
       subscriptionId,

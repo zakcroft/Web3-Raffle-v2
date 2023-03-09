@@ -1,7 +1,8 @@
 import { ethers, getNamedAccounts } from 'hardhat';
 
 import { BigNumber } from 'ethers';
-import { logStats } from "./logStats";
+
+import { logStats } from './logStats';
 
 async function enterRaffle() {
   const accounts = await getNamedAccounts();
