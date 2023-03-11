@@ -75,5 +75,4 @@ module.exports = {
     sources: useTestFolders ? 'test_contracts':'./contracts',
     deploy: useTestFolders ? 'test_deploy':'deploy'
   }
-
 };

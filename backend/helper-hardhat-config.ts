@@ -30,7 +30,7 @@ const networkConfig: NetworkConfigType = {
   4: {
     name: 'sepolia',
     vrfCoordinator: "0x8103B0A8A00be2DDC778e6e7eaa21791Cd364625",
-    // subscriptionId: 9214,
+    subscriptionId: 9214,
     tokenCost,
     gasLane: "0x474e34a077df58807dbe9c96d3c009b23b3c6d0cce433e59bbf5b34f823bc56c", //30 gwei
     callbackGasLimit: 100000,
@@ -40,9 +40,7 @@ const networkConfig: NetworkConfigType = {
     name: 'bnbTest',
     vrfCoordinator: '0x6A2AAd07396B36Fe02a22b33cf443582f682c82f',
     subscriptionId: 1498,
-    //tokenCost: ethers.utils.parseUnits('1000000 ', 'gwei'), //0.001 ether
-    //tokenCost: ethers.utils.parseUnits('1 ', 'gwei'), //0.001 ether
-
+    tokenCost,
     gasLane:
       '0xd4bb89654db74673a187bd804519e65e3f71a52bc55f11da7601a13dcf505314', //gasLaneRinkeby30
     callbackGasLimit: 100000,
