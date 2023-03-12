@@ -4,7 +4,7 @@ import { HardhatRuntimeEnvironment } from 'hardhat/types';
 import { ethers } from 'ethers';
 
 const BASE_FEE = ethers.utils.parseEther('0.25'); //Premium	0.25 LINK
-const GAS_PRICE_LINK = 1e9; //1000000000
+const GAS_PRICE_LINK = 1; //1000000000
 
 const deployMocks: DeployFunction = async function (
   hre: HardhatRuntimeEnvironment,

@@ -65,8 +65,10 @@ contract Raffle is
     address private s_lastWinner;
     uint256 private s_lastDrawTimeStamp;
     uint256 private i_automationUpdateInterval;
+    uint256 private startEndGameGas;
+    uint256 private finishEndGameGas;
 
-    VRFCoordinatorV2Interface private immutable i_vrfCoordinator;
+VRFCoordinatorV2Interface private immutable i_vrfCoordinator;
     bytes32 private i_gasLane;
     uint64 private i_subscriptionId;
     uint16 private constant VRF_REQUEST_CONFIRMATIONS = 3;
@@ -95,6 +97,7 @@ contract Raffle is
         s_lastDrawTimeStamp = block.timestamp;
         i_automationUpdateInterval = automationUpdateInterval;
     }
+
 
     function onERC721Received(
         address operator,
@@ -138,7 +141,6 @@ contract Raffle is
 
     function closeRaffle() public onlyOwner {
         s_raffleState = RAFFLE_STATE.CLOSED;
-        console.log('Raffle Closed');
     }
 
     function getPlayers()
@@ -164,6 +166,7 @@ contract Raffle is
         // Cost per token =  1e6 gwei = 1e15 wei == 1e-3 ether - 0.001 ether = ~£1.36
 
         // buy 1 or more tokens
+
         if (msg.value < i_tokenCost) {
             revert Raffle__SendMoreToEnterRaffle();
         }
@@ -233,35 +236,25 @@ contract Raffle is
         emit EnteredRaffle(msg.sender, getPlayers().get(msg.sender));
     }
 
-    function makeNFT() public {
-        raffleNFT.mintNft();
-    }
-
     // TODO calldata or memory?
     function pickWinner(uint256[] memory randomWords) public returns (uint256) {
+
         //calculating
         uint256 indexOfWinner = randomWords[0] % getNumberOfPlayers();
-        (address lastWinner, uint256 amount) = getPlayers().at(indexOfWinner);
+        (address winner, uint256 amount) = getPlayers().at(indexOfWinner);
+
 
         s_raffleState = RAFFLE_STATE.CLOSED;
-        console.log('Raffle Closed');
-
-        s_lastWinner = lastWinner;
+        s_lastWinner = winner;
 
         //TAKE 10% FEE
         uint256 pot = address(this).balance;
         uint256 winnings = pot.div(10).mul(9);
         uint256 raffleFee = pot.div(10).mul(1);
 
-        console.log('token s_owner()', token.s_owner());
-        console.log('s_owner()', raffleNFT.s_owner());
-        console.log('address', address(raffleNFT));
-
-        console.log('address', raffleNFT.ownerOf(0));
-
         // TODO check this is cheaper to transfer this way
         // or payable(s_lastWinner).transfer(address(this).balance * 1);
-        (bool success, ) = lastWinner.call{value: winnings}('');
+        (bool success, ) = s_lastWinner.call{value: winnings}('');
         if (!success) {
             revert Raffle__TransferFailed();
         }
@@ -270,9 +263,13 @@ contract Raffle is
             revert Raffle__TransferFailed();
         }
 
+        raffleNFT.mintNft(s_lastWinner);
+
         s_lastDrawTimeStamp = block.timestamp;
         emit WinningsSent(s_lastWinner, winnings);
         emit RaffleFeeSent(s_owner, raffleFee);
+
+        finishEndGameGas = gasleft();
 
         return winnings;
     }
@@ -289,8 +286,6 @@ contract Raffle is
         bool hasPLayers = getNumberOfPlayers() > 0;
         bool hasBalance = address(this).balance > 0;
         triggerRaffleDaw = (timePassed && isOpen && hasBalance && hasBalance);
-
-        console.log('triggerRaffleDaw', triggerRaffleDaw);
 
         return triggerRaffleDaw;
     }
@@ -312,9 +307,8 @@ contract Raffle is
     function performUpkeep(bytes calldata performData) external override {
         //Recommended to rerevalidate the checkUpkeep in the performUpkeep function
         // after callback
-        bool canMakeRaffleDraw = canMakeRaffleDraw();
 
-        if (!canMakeRaffleDraw) {
+        if (!canMakeRaffleDraw()) {
             revert Raffle__UpkeepNotNeeded(
                 address(this).balance,
                 getNumberOfPlayers(),
@@ -322,11 +316,12 @@ contract Raffle is
             );
         }
 
-        console.log('Starting raffle draw');
         // Start raffle draw.
         s_raffleState = RAFFLE_STATE.CALCULATING_WINNER;
         emit CalculatingWinner();
 
+        // start gase calculation for VRF callback
+        startEndGameGas = gasleft();
         // Will revert if subscription is not set and funded.
         uint256 requestId = i_vrfCoordinator.requestRandomWords(
             i_gasLane,
@@ -413,6 +408,10 @@ contract Raffle is
 
     function getRequestConfirmations() public pure returns (uint256) {
         return VRF_REQUEST_CONFIRMATIONS;
+    }
+
+    function getEndGameGasCost() public view returns (uint256) {
+        return startEndGameGas.sub(finishEndGameGas);
     }
 
     receive() external payable {}

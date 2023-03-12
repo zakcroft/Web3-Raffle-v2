@@ -5,7 +5,7 @@ import { BigNumber } from 'ethers';
 import { Raffle, VRFCoordinatorV2Mock } from '../typechain-types';
 import { logStats } from './logStats';
 
-async function mockKeepers() {
+export async function vrfDrawRaffle() {
   const raffle: Raffle = await ethers.getContract('Raffle');
   console.log('Running mockKeepers with raffle.address', raffle.address);
   const checkData = ethers.utils.keccak256(ethers.utils.toUtf8Bytes(''));
@@ -50,7 +50,7 @@ async function mockVrf(requestId: BigNumber, raffle: Raffle) {
   await logStats('After VRF draw');
 }
 
-mockKeepers()
+vrfDrawRaffle()
   .then(() => process.exit(0))
   .catch((error) => {
     console.error(error);

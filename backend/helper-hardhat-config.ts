@@ -24,7 +24,7 @@ const networkConfig: NetworkConfigType = {
     tokenCost,
     gasLane:
       '0xd89b2bf150e3b9e13446986e571fb9cab24b13cea0a43ea20a6049a85cc807cc', //this is mocked
-    callbackGasLimit: 100000,
+    callbackGasLimit: 2500000,// 2500000 === maxGasLimit // cost 137501 ?
     automationUpdateInterval: 30,
   },
   4: {

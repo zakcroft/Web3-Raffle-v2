@@ -4,7 +4,7 @@ import { BigNumber } from 'ethers';
 
 import { logStats } from './logStats';
 
-async function enterRaffle() {
+export async function enterRaffle() {
   const accounts = await getNamedAccounts();
   const player = accounts.player;
 

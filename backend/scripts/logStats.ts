@@ -81,6 +81,23 @@ export async function logStats(msg?: string, run = true) {
     (await raffleToken.balanceOf(player)).toString(),
   );
 
+  // Closed
+  if(await raffle.getRaffleState() === 2) {
+    console.log(
+      'RaffleNFT winner',
+      (await raffleNFT.ownerOf('0')).toString(),
+    );
+    console.log(
+      'End game gas cost',
+      (await raffle.getEndGameGasCost()).toString(),
+    );
+
+    console.log(
+      'Mint gas costs',
+      (await raffleNFT.getMintGasCost()).toString(),
+    );
+  }
+
   console.log(
     'END ==============================================================',
   );

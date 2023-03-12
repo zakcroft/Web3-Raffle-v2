@@ -4,7 +4,7 @@ import { BigNumber } from 'ethers';
 
 import { logStats } from './logStats';
 
-async function buyRaffleTokens() {
+export async function buyRaffleTokens() {
   const accounts = await getNamedAccounts();
   const player = accounts.player;
 
