@@ -93,6 +93,10 @@ export async function logStats(msg?: string, run = true) {
       'Mint gas costs',
       (await raffleNFT.getMintGasCost()).toString(),
     );
+    console.log(
+      'Total supply of NFTs awarded',
+      (await raffleNFT.totalSupply()).toString(),
+    );
   }
 
   console.log(
