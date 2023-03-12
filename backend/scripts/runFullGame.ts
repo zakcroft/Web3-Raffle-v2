@@ -3,14 +3,12 @@ import { enterRaffle } from './enterRaffle';
 import { vrfDrawRaffle } from './vrfDrawRaffle';
 
 async function runFullGame() {
-
   await buyRaffleTokens();
   await buyRaffleTokens();
   await enterRaffle();
   // setTimeout(async () => {
   //   await vrfDrawRaffle();
   // }, 5000);
-
 }
 
 runFullGame()

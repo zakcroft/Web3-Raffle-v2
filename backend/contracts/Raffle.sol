@@ -68,7 +68,7 @@ contract Raffle is
     uint256 private startEndGameGas;
     uint256 private finishEndGameGas;
 
-VRFCoordinatorV2Interface private immutable i_vrfCoordinator;
+    VRFCoordinatorV2Interface private immutable i_vrfCoordinator;
     bytes32 private i_gasLane;
     uint64 private i_subscriptionId;
     uint16 private constant VRF_REQUEST_CONFIRMATIONS = 3;
@@ -98,13 +98,12 @@ VRFCoordinatorV2Interface private immutable i_vrfCoordinator;
         i_automationUpdateInterval = automationUpdateInterval;
     }
 
-
     function onERC721Received(
         address operator,
         address from,
         uint256 tokenId,
         bytes memory data
-    ) public returns (bytes4) {
+    ) public pure returns (bytes4) {
         // Implement your logic here
         // Return the ERC721_RECEIVED value to indicate that the transfer was successful
         return
@@ -238,11 +237,9 @@ VRFCoordinatorV2Interface private immutable i_vrfCoordinator;
 
     // TODO calldata or memory?
     function pickWinner(uint256[] memory randomWords) public returns (uint256) {
-
         //calculating
         uint256 indexOfWinner = randomWords[0] % getNumberOfPlayers();
         (address winner, uint256 amount) = getPlayers().at(indexOfWinner);
-
 
         s_raffleState = RAFFLE_STATE.CLOSED;
         s_lastWinner = winner;

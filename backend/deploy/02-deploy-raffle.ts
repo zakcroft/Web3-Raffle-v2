@@ -13,7 +13,7 @@ const deployRaffle: DeployFunction = async function (
   // @ts-ignore
   const { getNamedAccounts, deployments, network, ethers } = hre;
   const { deploy, log, get } = deployments;
-  const { deployer } = await getNamedAccounts();
+  const { deployer, player } = await getNamedAccounts();
   const chainId = network.config.chainId;
   const VRF_MOCK_FUND_AMOUNT = '1000000000000000000000';
 
@@ -58,11 +58,13 @@ const deployRaffle: DeployFunction = async function (
   console.log('raffleToken s_owner()', await raffleToken.s_owner());
 
   const raffleNFT = await ethers.getContract('RaffleNFT');
-  // raffleNFT.mintNft();
+
+  // raffleNFT.mintNft(player);
   //
+  // console.log('raffleNFT s_owner()', await raffleNFT.s_owner())
   // console.log('raffleNFT balanceOf', (await raffleNFT.balanceOf(deployer)).toString())
   // console.log('raffleNFT owner of 0', await raffleNFT.ownerOf('0'))
-  // console.log('raffleNFT s_owner()', await raffleNFT.s_owner())
+  //
   // console.log('raffleNFT address', await raffleNFT.address)
 
   // RAFFLE
@@ -111,10 +113,13 @@ const deployRaffle: DeployFunction = async function (
     _INIT_SALES_ALLOCATION,
   );
 
-  if (developmentChains.includes(network.name)) {
-    const raffle = await ethers.getContract('Raffle');
-    await vrfCoordinatorV2Mock.addConsumer(subscriptionId, raffle.address);
+  const raffle = await ethers.getContract('Raffle');
 
+  // Allow the raffle to mint NFTs
+  raffleNFT.grantMinterRole(raffle.address);
+
+  if (developmentChains.includes(network.name)) {
+    await vrfCoordinatorV2Mock.addConsumer(subscriptionId, raffle.address);
     await vrfCoordinatorV2Mock.fundSubscription(
       subscriptionId,
       VRF_MOCK_FUND_AMOUNT,
