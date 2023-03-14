@@ -31,6 +31,7 @@ contract RaffleNFT is ERC721URIStorage, ERC721Enumerable, AccessControl {
         uint256 tokenId = s_tokenCounter.current();
         s_tokenCounter.increment();
         _safeMint(to, tokenId);
+       // _setTokenURI(tokenId, tokenURI);
         finishMintGas = gasleft();
     }
 

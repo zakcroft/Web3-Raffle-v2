@@ -5,7 +5,7 @@
     "sourceMap": true,
     "strict": true,
     "outDir": "dist",
-    "esModuleInterop": false
+    "esModuleInterop": true
   },
   "include": [
     "./scripts",
