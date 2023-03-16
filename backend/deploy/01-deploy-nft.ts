@@ -1,10 +1,43 @@
-const { network } = require('hardhat');
+const { network, deployments } = require('hardhat');
+
 const { developmentChains } = require('../helper-hardhat-config');
 const { verify } = require('../utils/verify');
+import { filesFromPath } from 'files-from-path';
+import { File, NFTStorage } from 'nft.storage';
+import * as path from 'path';
+
+const NFT_STORAGE_KEY = process.env.NFT_STORAGE || '';
+
+async function storeNFTDir(directoryPath = './nft-resources') {
+  const { log } = deployments;
+
+  log('----------------------------------------------------');
+  log('Uploading NFTs to storage...');
+
+  const files = await filesFromPath(directoryPath, {
+    pathPrefix: path.resolve(directoryPath),
+  });
+
+  const storage = new NFTStorage({ token: NFT_STORAGE_KEY });
+  const responses = [];
+  for await (let file of files) {
+    const response = await storage.store({
+      image: new File([file.stream()], file.name, { type: 'image/jpg' }),
+      name: file.name,
+      description: `An adorable ${file.name}`,
+      attributes: [{ trait_type: 'cuteness', value: 100 }],
+    });
+    responses.push(response);
+  }
+  log('Done uploading...');
+
+  return responses;
+}
 
 module.exports = async ({ getNamedAccounts, deployments }) => {
   const { deploy, log } = deployments;
   const { deployer } = await getNamedAccounts();
+  const tokenUris = await storeNFTDir();
 
   log('----------------------------------------------------');
   log('Deploying RaffleNFT...');
