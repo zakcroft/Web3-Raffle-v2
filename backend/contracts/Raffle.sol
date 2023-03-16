@@ -239,6 +239,8 @@ contract Raffle is
     function pickWinner(uint256[] memory randomWords) public returns (uint256) {
         //calculating
         uint256 indexOfWinner = randomWords[0] % getNumberOfPlayers();
+        uint256 nftIndexToMint = randomWords[0] %
+            raffleNFT.getTokenUrisLength();
         (address winner, uint256 amount) = getPlayers().at(indexOfWinner);
 
         s_raffleState = RAFFLE_STATE.CLOSED;
@@ -260,7 +262,7 @@ contract Raffle is
             revert Raffle__TransferFailed();
         }
 
-        raffleNFT.mintNft(s_lastWinner);
+        raffleNFT.mintNft(s_lastWinner, nftIndexToMint);
 
         s_lastDrawTimeStamp = block.timestamp;
         emit WinningsSent(s_lastWinner, winnings);

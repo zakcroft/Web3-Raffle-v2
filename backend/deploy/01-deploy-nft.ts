@@ -1,10 +1,11 @@
+import * as path from 'path';
+import { filesFromPath } from 'files-from-path';
+import { File, NFTStorage } from 'nft.storage';
+
 const { network, deployments } = require('hardhat');
 
 const { developmentChains } = require('../helper-hardhat-config');
 const { verify } = require('../utils/verify');
-import { filesFromPath } from 'files-from-path';
-import { File, NFTStorage } from 'nft.storage';
-import * as path from 'path';
 
 const NFT_STORAGE_KEY = process.env.NFT_STORAGE || '';
 
@@ -29,7 +30,7 @@ async function storeNFTDir(directoryPath = './nft-resources') {
     });
     responses.push(response);
   }
-  log('Done uploading...');
+  log('Done uploading...', responses);
 
   return responses;
 }
@@ -41,7 +42,7 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
 
   log('----------------------------------------------------');
   log('Deploying RaffleNFT...');
-  const args = [];
+  const args = [tokenUris];
   const raffleNFT = await deploy('RaffleNFT', {
     from: deployer,
     args,

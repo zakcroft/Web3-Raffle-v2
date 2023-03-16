@@ -14,32 +14,34 @@ contract RaffleNFT is ERC721URIStorage, ERC721Enumerable, AccessControl {
     using Counters for Counters.Counter;
     Counters.Counter private s_tokenCounter;
     address public s_owner;
-    string public constant TOKEN_URI =
-        'ipfs://bafybeifdj4gp7bxo4zd2jh6h6al4etoa3fcifhxgpk5pafquxxhevhut24/?filename=happy.json';
+    string[] internal s_tokenUris;
 
     uint256 private startMintGas;
     uint256 private finishMintGas;
 
-    constructor() ERC721('Smile', 'HAPPY WINNER') {
+    constructor(string[] memory tokenUris) ERC721('Smile', 'HAPPY WINNER') {
+        s_tokenUris = tokenUris;
         s_owner = msg.sender;
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
         _grantRole(MINTER_ROLE, msg.sender);
     }
 
-    function mintNft(address to) public onlyRole(MINTER_ROLE) {
+    function mintNft(
+        address to,
+        uint256 rndNumber
+    ) public onlyRole(MINTER_ROLE) {
         startMintGas = gasleft();
         uint256 tokenId = s_tokenCounter.current();
         s_tokenCounter.increment();
         _safeMint(to, tokenId);
-        // _setTokenURI(tokenId, tokenURI);
+        _setTokenURI(tokenId, s_tokenUris[rndNumber]);
         finishMintGas = gasleft();
     }
 
     function tokenURI(
         uint256 tokenId
-    ) public pure override(ERC721, ERC721URIStorage) returns (string memory) {
-        // require(_exists(tokenId), "ERC721Metadata: URI query for nonexistent token");
-        return TOKEN_URI;
+    ) public view override(ERC721, ERC721URIStorage) returns (string memory) {
+        return super.tokenURI(tokenId);
     }
 
     function grantMinterRole(
@@ -51,6 +53,10 @@ contract RaffleNFT is ERC721URIStorage, ERC721Enumerable, AccessControl {
     // getters
     function getTokenCounter() public view returns (uint256) {
         return s_tokenCounter.current();
+    }
+
+    function getTokenUrisLength() public view returns (uint256) {
+        return s_tokenUris.length;
     }
 
     function getMintGasCost() public view returns (uint256) {
