@@ -15,6 +15,7 @@ contract RaffleNFT is ERC721URIStorage, ERC721Enumerable, AccessControl {
     Counters.Counter private s_tokenCounter;
     address public s_owner;
     string[] internal s_tokenUris;
+    string internal s_lastMintedTokenUri;
 
     uint256 private startMintGas;
     uint256 private finishMintGas;
@@ -38,9 +39,10 @@ contract RaffleNFT is ERC721URIStorage, ERC721Enumerable, AccessControl {
         uint256 tokenId = s_tokenCounter.current();
         s_tokenCounter.increment();
         _safeMint(to, tokenId);
+        s_lastMintedTokenUri = s_tokenUris[rndNumber];
         console.log(rndNumber);
-        console.log(s_tokenUris[0]);
-        _setTokenURI(tokenId, s_tokenUris[rndNumber]);
+        console.log(s_lastMintedTokenUri);
+        _setTokenURI(tokenId, s_lastMintedTokenUri);
         finishMintGas = gasleft();
     }
 
@@ -63,6 +65,10 @@ contract RaffleNFT is ERC721URIStorage, ERC721Enumerable, AccessControl {
 
     function getTokenUrisLength() public view returns (uint256) {
         return s_tokenUris.length;
+    }
+
+    function getLastMintedTokenUri() public view returns (string memory) {
+        return s_lastMintedTokenUri;
     }
 
     function getMintGasCost() public view returns (uint256) {
