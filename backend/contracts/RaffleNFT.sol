@@ -69,6 +69,10 @@ contract RaffleNFT is ERC721URIStorage, ERC721Enumerable, AccessControl {
         return s_tokenUris[i];
     }
 
+    function getTokenUris() public view returns (string[] memory) {
+        return s_tokenUris;
+    }
+
     function getTokenUrisLength() public view returns (uint256) {
         return s_tokenUris.length;
     }
