@@ -37,7 +37,8 @@
     "solidity-coverage": "^0.7.21",
     "ts-node": "^10.9.1",
     "typechain": "^8.1.1",
-    "typescript": "^4.7.4"
+    "typescript": "^4.7.4",
+    "web3.storage": "^4.5.4"
   },
   "scripts": {
     "prettier": "./node_modules/.bin/prettier --write '{**/*.{js,css,html,tsx,json,sol,ts},test/*.js,.json}'",

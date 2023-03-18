@@ -19,7 +19,11 @@ contract RaffleNFT is ERC721URIStorage, ERC721Enumerable, AccessControl {
     uint256 private startMintGas;
     uint256 private finishMintGas;
 
-    constructor(string[] memory tokenUris) ERC721('Smile', 'HAPPY WINNER') {
+    constructor(
+        string memory name,
+        string memory symbol,
+        string[] memory tokenUris
+    ) ERC721(name, symbol) {
         s_tokenUris = tokenUris;
         s_owner = msg.sender;
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
@@ -34,6 +38,8 @@ contract RaffleNFT is ERC721URIStorage, ERC721Enumerable, AccessControl {
         uint256 tokenId = s_tokenCounter.current();
         s_tokenCounter.increment();
         _safeMint(to, tokenId);
+        console.log(rndNumber);
+        console.log(s_tokenUris[0]);
         _setTokenURI(tokenId, s_tokenUris[rndNumber]);
         finishMintGas = gasleft();
     }

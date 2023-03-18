@@ -85,6 +85,10 @@ export async function logStats(msg?: string, run = true) {
   if ((await raffle.getRaffleState()) === 2) {
     console.log('RaffleNFT winner', (await raffleNFT.ownerOf('0')).toString());
     console.log(
+      'RaffleNFT winner tokenURI',
+      (await raffleNFT.tokenURI('0')).toString(),
+    );
+    console.log(
       'End game gas cost',
       (await raffle.getEndGameGasCost()).toString(),
     );

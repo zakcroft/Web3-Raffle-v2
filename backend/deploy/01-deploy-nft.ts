@@ -9,6 +9,8 @@ const { verify } = require('../utils/verify');
 
 const NFT_STORAGE_KEY = process.env.NFT_STORAGE || '';
 
+const symbol = 'RAFFLE_WINNER';
+
 async function storeNFTDir(directoryPath = './nft-resources') {
   const { log } = deployments;
 
@@ -22,17 +24,20 @@ async function storeNFTDir(directoryPath = './nft-resources') {
   const storage = new NFTStorage({ token: NFT_STORAGE_KEY });
   const responses = [];
   for await (let file of files) {
+    const name = file.name.replace('/', '');
     const response = await storage.store({
-      image: new File([file.stream()], file.name, { type: 'image/jpg' }),
-      name: file.name,
-      description: `An adorable ${file.name}`,
-      attributes: [{ trait_type: 'cuteness', value: 100 }],
+      image: new File([file.stream()], name, { type: 'image/svg+xm' }),
+      name,
+      symbol,
+      description: `Raffle winning NFT name: ${name}`,
+      attributes: [{ game_outcome: 'winner', value: 100 }],
     });
     responses.push(response);
   }
   log('Done uploading...', responses);
+  log('TokenUri mapping', responses.map((r) => r.url));
 
-  return responses;
+  return responses.map((r) => r.url);
 }
 
 module.exports = async ({ getNamedAccounts, deployments }) => {
@@ -42,7 +47,8 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
 
   log('----------------------------------------------------');
   log('Deploying RaffleNFT...');
-  const args = [tokenUris];
+
+  const args = ['RaffleERC721', symbol, tokenUris];
   const raffleNFT = await deploy('RaffleNFT', {
     from: deployer,
     args,

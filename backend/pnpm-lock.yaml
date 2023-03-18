@@ -36,6 +36,7 @@ specifiers:
   ts-node: ^10.9.1
   typechain: ^8.1.1
   typescript: ^4.7.4
+  web3.storage: ^4.5.4
 
 dependencies:
   '@openzeppelin/contracts': 4.8.2
@@ -75,6 +76,7 @@ devDependencies:
   ts-node: 10.9.1_lwgqdwokjtwlohdqtbb6s252kq
   typechain: 8.1.1_typescript@4.9.5
   typescript: 4.9.5
+  web3.storage: 4.5.4_node-fetch@2.6.9
 
 packages:
 
@@ -838,6 +840,10 @@ packages:
     dependencies:
       multiformats: 9.9.0
       murmurhash3js-revisited: 3.0.0
+    dev: true
+
+  /@noble/ed25519/1.7.3:
+    resolution: {integrity: sha512-iR8GBkDt0Q3GyaVcIu7mSsVIqnFbkbRzGLWlvhwunacoLwt4J3swfKhfaM6rN6WY+TBGoYT1GtT1mIh2/jGbRQ==}
     dev: true
 
   /@noble/hashes/1.2.0:
@@ -1732,6 +1738,18 @@ packages:
       data-uri-to-buffer: 3.0.1
     dev: true
 
+  /@web-std/fetch/4.1.0:
+    resolution: {integrity: sha512-ZRizMcP8YyuRlhIsRYNFD9x/w28K7kbUhNGmKM9hDy4qeQ5xMTk//wA89EF+Clbl6EP4ksmCcN+4TqBMSRL8Zw==}
+    engines: {node: ^10.17 || >=12.3}
+    dependencies:
+      '@web-std/blob': 3.0.4
+      '@web-std/form-data': 3.0.2
+      '@web-std/stream': 1.0.1
+      '@web3-storage/multipart-parser': 1.0.0
+      data-uri-to-buffer: 3.0.1
+      mrmime: 1.0.1
+    dev: true
+
   /@web-std/file/3.0.2:
     resolution: {integrity: sha512-pIH0uuZsmY8YFvSHP1NsBIiMT/1ce0suPrX74fEeO3Wbr1+rW0fUGEe4d0R99iLwXtyCwyserqCFI4BJkJlkRA==}
     dependencies:
@@ -1750,8 +1768,18 @@ packages:
       web-streams-polyfill: 3.2.1
     dev: true
 
+  /@web-std/stream/1.0.1:
+    resolution: {integrity: sha512-tsz4Y0WNDgFA5jwLSeV7/UV5rfMIlj0cPsSLVfTihjaVW0OJPd5NxJ3le1B3yLyqqzRpeG5OAfJAADLc4VoGTA==}
+    dependencies:
+      web-streams-polyfill: 3.2.1
+    dev: true
+
   /@web3-storage/multipart-parser/1.0.0:
     resolution: {integrity: sha512-BEO6al7BYqcnfX15W2cnGR+Q566ACXAT9UQykORCWW80lmkpWsnEob6zJS1ZVBKsSJC8+7vJkHwlp+lXG1UCdw==}
+    dev: true
+
+  /@web3-storage/parse-link-header/3.1.0:
+    resolution: {integrity: sha512-K1undnK70vLLauqdE8bq/l98isTF2FDhcP0UPpXVSjkSWe3xhAn5eRXk5jfA1E5ycNm84Ws/rQFUD7ue11nciw==}
     dev: true
 
   /@yarnpkg/lockfile/1.1.0:
@@ -6448,6 +6476,37 @@ packages:
       - supports-color
     dev: true
 
+  /ipfs-car/0.7.0_node-fetch@2.6.9:
+    resolution: {integrity: sha512-9ser6WWZ1ZMTCGbcVkRXUzOrpQ4SIiLfzIEnk+3LQsXbV09yeZg3ijhRuEXozEIYE68Go9JmOFshamsK9iKlNQ==}
+    hasBin: true
+    dependencies:
+      '@ipld/car': 3.2.4
+      '@web-std/blob': 3.0.4
+      bl: 5.1.0
+      blockstore-core: 1.0.5
+      browser-readablestream-to-it: 1.0.3
+      idb-keyval: 6.2.0
+      interface-blockstore: 2.0.3
+      ipfs-core-types: 0.8.4_node-fetch@2.6.9
+      ipfs-core-utils: 0.12.2_node-fetch@2.6.9
+      ipfs-unixfs-exporter: 7.0.11
+      ipfs-unixfs-importer: 9.0.10
+      ipfs-utils: 9.0.14
+      it-all: 1.0.6
+      it-last: 1.0.6
+      it-pipe: 1.1.0
+      meow: 9.0.0
+      move-file: 2.1.0
+      multiformats: 9.9.0
+      stream-to-it: 0.2.4
+      streaming-iterables: 6.2.0
+      uint8arrays: 3.1.1
+    transitivePeerDependencies:
+      - encoding
+      - node-fetch
+      - supports-color
+    dev: true
+
   /ipfs-core-types/0.8.4_node-fetch@2.6.9:
     resolution: {integrity: sha512-sbRZA1QX3xJ6ywTiVQZMOxhlhp4osAZX2SXx3azOLxAtxmGWDMkHYt722VV4nZ2GyJy8qyk5GHQIZ0uvQnpaTg==}
     dependencies:
@@ -6558,6 +6617,24 @@ packages:
       stream-to-it: 0.2.4
     transitivePeerDependencies:
       - encoding
+    dev: true
+
+  /ipns/0.16.0:
+    resolution: {integrity: sha512-fBYkRjN3/fc6IQujUF4WBEyOXegK715w+wx9IErV6H2B5JXsMnHOBceUKn3L90dj+wJfHs6T+hM/OZiTT6mQCw==}
+    dependencies:
+      cborg: 1.10.0
+      debug: 4.3.4
+      err-code: 3.0.1
+      interface-datastore: 6.1.1
+      libp2p-crypto: 0.21.2
+      long: 4.0.0
+      multiformats: 9.9.0
+      peer-id: 0.16.0
+      protobufjs: 6.11.3
+      timestamp-nano: 1.0.1
+      uint8arrays: 3.1.1
+    transitivePeerDependencies:
+      - supports-color
     dev: true
 
   /is-accessor-descriptor/0.1.6:
@@ -6895,6 +6972,14 @@ packages:
 
   /isexe/2.0.0:
     resolution: {integrity: sha512-RHxMLp9lnKHGHRng9QFhRCMbYAcVpn69smSGcq3f36xjgVVWThj4qqLbTLlq7Ssj8B+fIQ1EuCEGI2lKsyQeIw==}
+    dev: true
+
+  /iso-random-stream/2.0.2:
+    resolution: {integrity: sha512-yJvs+Nnelic1L2vH2JzWvvPQFA4r7kSTnpST/+LkAQjSz0hos2oqLD+qIVi9Qk38Hoe7mNDt3j0S27R58MVjLQ==}
+    engines: {node: '>=10'}
+    dependencies:
+      events: 3.3.0
+      readable-stream: 3.6.2
     dev: true
 
   /iso-url/1.2.1:
@@ -7389,6 +7474,20 @@ packages:
     dependencies:
       prelude-ls: 1.2.1
       type-check: 0.4.0
+    dev: true
+
+  /libp2p-crypto/0.21.2:
+    resolution: {integrity: sha512-EXFrhSpiHtJ+/L8xXDvQNK5VjUMG51u878jzZcaT5XhuN/zFg6PWJFnl/qB2Y2j7eMWnvCRP7Kp+ua2H36cG4g==}
+    engines: {node: '>=12.0.0'}
+    dependencies:
+      '@noble/ed25519': 1.7.3
+      '@noble/secp256k1': 1.7.1
+      err-code: 3.0.1
+      iso-random-stream: 2.0.2
+      multiformats: 9.9.0
+      node-forge: 1.3.1
+      protobufjs: 6.11.3
+      uint8arrays: 3.1.1
     dev: true
 
   /lines-and-columns/1.2.4:
@@ -7958,6 +8057,11 @@ packages:
       path-exists: 4.0.0
     dev: true
 
+  /mrmime/1.0.1:
+    resolution: {integrity: sha512-hzzEagAgDyoU1Q6yg5uI+AorQgdvMCur3FcKf7NhMKWsaYg+RnbTyHRa/9IlLF9rf455MOCtcqqrQQ83pPP7Uw==}
+    engines: {node: '>=10'}
+    dev: true
+
   /ms/2.0.0:
     resolution: {integrity: sha512-Tpp60P6IUJDTuOq/5Z8cdskzJujfwqfOTkrwIwj7IRISpnkJnT6SyJ4PCPnGMoFjC9ddhal5KVIYtAt97ix05A==}
     dev: true
@@ -8193,6 +8297,11 @@ packages:
         optional: true
     dependencies:
       whatwg-url: 5.0.0
+    dev: true
+
+  /node-forge/1.3.1:
+    resolution: {integrity: sha512-dPEtOeMvF9VMcYV/1Wb8CPoVAXtp6MKMlcbAt4ddqmGqUJ6fQZFXkNZNkNlfevtNkGtaSoXf/vNNNSvgrdXwtA==}
+    engines: {node: '>= 6.13.0'}
     dev: true
 
   /node-gyp-build/4.6.0:
@@ -8704,6 +8813,17 @@ packages:
       ripemd160: 2.0.2
       safe-buffer: 5.2.1
       sha.js: 2.4.11
+    dev: true
+
+  /peer-id/0.16.0:
+    resolution: {integrity: sha512-EmL7FurFUduU9m1PS9cfJ5TAuCvxKQ7DKpfx3Yj6IKWyBRtosriFuOag/l3ni/dtPgPLwiA4R9IvpL7hsDLJuQ==}
+    engines: {node: '>=15.0.0'}
+    dependencies:
+      class-is: 1.1.0
+      libp2p-crypto: 0.21.2
+      multiformats: 9.9.0
+      protobufjs: 6.11.3
+      uint8arrays: 3.1.1
     dev: true
 
   /performance-now/2.1.0:
@@ -10368,6 +10488,11 @@ packages:
       retimer: 2.0.0
     dev: true
 
+  /timestamp-nano/1.0.1:
+    resolution: {integrity: sha512-4oGOVZWTu5sl89PtCDnhQBSt7/vL1zVEwAfxH1p49JhTosxzVQWYBYFRFZ8nJmo0G6f824iyP/44BFAwIoKvIA==}
+    engines: {node: '>= 4.5.0'}
+    dev: true
+
   /tmp/0.0.33:
     resolution: {integrity: sha512-jRCJlojKnZ3addtTOjdIqoRuPEKBvNXcGYqzO6zWZX8KfKEpnGY5jfggJQ3EjKuu8D4bJRr0y+cYJFmYbImXGw==}
     engines: {node: '>=0.6.0'}
@@ -10952,6 +11077,20 @@ packages:
       assert-plus: 1.0.0
       core-util-is: 1.0.2
       extsprintf: 1.3.0
+    dev: true
+
+  /w3name/1.0.8:
+    resolution: {integrity: sha512-MjCUGATeNm70YE1Zro4mykaoRI9dTTlr44AB83Qt6OaRlcLvH9g0gyLwAMd3gBm8oDVU/RrDAxsDGcO8r+RIuQ==}
+    engines: {node: '>=16.0.0', npm: '>=7.0.0'}
+    dependencies:
+      '@web-std/fetch': 4.1.0
+      cborg: 1.10.0
+      ipns: 0.16.0
+      libp2p-crypto: 0.21.2
+      throttled-queue: 2.1.4
+      uint8arrays: 3.1.1
+    transitivePeerDependencies:
+      - supports-color
     dev: true
 
   /web-encoding/1.1.5:
@@ -11759,6 +11898,31 @@ packages:
       number-to-bn: 1.7.0
       randombytes: 2.1.0
       utf8: 3.0.0
+    dev: true
+
+  /web3.storage/4.5.4_node-fetch@2.6.9:
+    resolution: {integrity: sha512-QSdiPEMgXCkk9Y0y3U1pyTu8n1TOOctwq7h9Loz7NYPla9QZesbg4lSxe0XWPltzyJEkI43yC1hy8gNxNEiizA==}
+    dependencies:
+      '@ipld/car': 3.2.4
+      '@web-std/blob': 3.0.4
+      '@web-std/fetch': 3.0.3
+      '@web-std/file': 3.0.2
+      '@web3-storage/parse-link-header': 3.1.0
+      browser-readablestream-to-it: 1.0.3
+      carbites: 1.0.6
+      cborg: 1.10.0
+      files-from-path: 0.2.6
+      ipfs-car: 0.7.0_node-fetch@2.6.9
+      libp2p-crypto: 0.21.2
+      p-retry: 4.6.2
+      streaming-iterables: 6.2.0
+      throttled-queue: 2.1.4
+      uint8arrays: 3.1.1
+      w3name: 1.0.8
+    transitivePeerDependencies:
+      - encoding
+      - node-fetch
+      - supports-color
     dev: true
 
   /web3/1.2.11:
