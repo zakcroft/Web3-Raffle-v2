@@ -87,7 +87,7 @@ export async function logStats(msg?: string, run = true) {
 
     console.log(
       'RaffleNFT winner tokenURI',
-      (await raffleNFT.getLastMintedTokenUri()).toString()
+      (await raffleNFT.getLastMintedTokenUri()).toString(),
     );
     console.log(
       'End game gas cost',
