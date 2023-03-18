@@ -1,13 +1,12 @@
 import * as path from 'path';
-import { filesFromPath } from 'files-from-path';
-import { File, NFTStorage } from 'nft.storage';
+import { File, Web3Storage, filesFromPath } from 'web3.storage';
 
 const { network, deployments } = require('hardhat');
 
 const { developmentChains } = require('../helper-hardhat-config');
 const { verify } = require('../utils/verify');
 
-const NFT_STORAGE_KEY = process.env.NFT_STORAGE || '';
+const WEB3_STORAGE = process.env.WEB3_STORAGE || '';
 
 const symbol = 'RAFFLE_WINNER';
 
@@ -21,23 +20,45 @@ async function storeNFTDir(directoryPath = './nft-resources') {
     pathPrefix: path.resolve(directoryPath),
   });
 
-  const storage = new NFTStorage({ token: NFT_STORAGE_KEY });
-  const responses = [];
+  const storage = new Web3Storage({ token: WEB3_STORAGE });
+  const cids = [];
   for await (let file of files) {
-    const name = file.name.replace('/', '');
-    const response = await storage.store({
-      image: new File([file.stream()], name, { type: 'image/svg+xm' }),
-      name,
-      symbol,
-      description: `Raffle winning NFT name: ${name}`,
-      attributes: [{ game_outcome: 'winner', value: 100 }],
-    });
-    responses.push(response);
-  }
-  log('Done uploading...', responses);
-  log('TokenUri mapping', responses.map((r) => r.url));
+    const fileNameWithExtension = file.name.replace('/', '');
+    const fileNameWithExtensionLowerCase = fileNameWithExtension.toLowerCase();
+    const name = fileNameWithExtension.split('.')[0];
+    const nameLowerCase = name.toLowerCase();
 
-  return responses.map((r) => r.url);
+    const createIpfsUrl = (cid, name) => `ipfs://${cid}/${name}`;
+
+    const cid = await storage.put([
+      { ...file, name: fileNameWithExtensionLowerCase },
+    ]);
+    const image = createIpfsUrl(cid, fileNameWithExtensionLowerCase);
+
+    // meta
+    const metaBuffer = Buffer.from(
+      JSON.stringify({
+        image,
+        name,
+        symbol,
+        description: `Raffle winning NFT name: ${name}`,
+        attributes: [{ game_outcome: 'winner', value: 100 }],
+      }),
+    );
+
+    const metaCid = await storage.put([
+      new File([metaBuffer], `${nameLowerCase}.json`),
+    ]);
+    const metaIpfsUrl = createIpfsUrl(metaCid, `${nameLowerCase}.json`);
+    cids.push(metaIpfsUrl);
+  }
+  log('Done uploading...', cids);
+  log(
+    'TokenUri mapping',
+    cids.map((cid) => cid),
+  );
+
+  return cids.map((cid) => cid);
 }
 
 module.exports = async ({ getNamedAccounts, deployments }) => {
