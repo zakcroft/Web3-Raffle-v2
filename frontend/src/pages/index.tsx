@@ -7,20 +7,43 @@ const inter = Inter({ subsets: ["latin"] });
 
 import { useEvmNativeBalance } from "@moralisweb3/next";
 
+import { useContractWrite, useContract, Web3Button, useChainId, ConnectWallet } from "@thirdweb-dev/react";
+
+import { abi, contractAddresses } from "../constants"
+
+interface contractAddressesInterface {
+  [key: string]: string[]
+}
+
 export default function App() {
-  const address = "0xdAC17F958D2ee523a2206206994597C13D831ec7";
-  const { data: nativeBalance } = useEvmNativeBalance({ address });
-  console.log(nativeBalance);
+  const addresses: contractAddressesInterface = contractAddresses
+    const chainId = useChainId();
+
+  //const chainId: string = parseInt(chainIdHex!).toString()
+  const raffleAddress = chainId && chainId in addresses ? addresses[chainId][0] : ''
+  //const { data: nativeBalance } = useEvmNativeBalance({ raffleAddress });
+  console.log(addresses);
   return (
     <>
       <main className={styles.main}>
         <div className={styles.description}>
           <div>
-            <h3>Wallet: {address}</h3>
-            <h3>Native Balance: {nativeBalance?.balance.ether} ETH</h3>
+            <h3>Wallet: {raffleAddress}</h3>
+            {/*<h3>Native Balance: {nativeBalance?.balance.ether} ETH</h3>*/}
           </div>
-          <p>
-            Get started by editing&nbsp;
+          <ConnectWallet
+              theme="dark"
+              btnTitle="Connect Wallet"
+          />
+          {/*<Web3Button*/}
+          {/*  onSuccess={() => console.log("success")}*/}
+          {/*  contractAddress={raffleAddress}*/}
+          {/*  action={async (contract) => contract.call("myFunctionName")}*/}
+          {/*>*/}
+          {/*  Call myFunctionName from the connected wallet*/}
+          {/*</Web3Button>*/}
+          <p className={'text-red p-20'}>
+            TEST
             <code className={styles.code}>src/pages/index.tsx</code>
           </p>
           <div>
