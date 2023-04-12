@@ -1,10 +1,12 @@
-import { Action, configureStore, ThunkAction } from "@reduxjs/toolkit";
-import { setupListeners } from "@reduxjs/toolkit/query";
+import { TypedUseSelectorHook, useDispatch, useSelector } from 'react-redux';
 
-import counter from "./counterSlice";
-import balance from "./ethBalance";
-import { TypedUseSelectorHook, useDispatch, useSelector } from "react-redux";
-import { createWrapper } from "next-redux-wrapper";
+import { Action, ThunkAction, configureStore } from '@reduxjs/toolkit';
+import { setupListeners } from '@reduxjs/toolkit/query';
+
+import { createWrapper } from 'next-redux-wrapper';
+
+import counter from './counterSlice';
+import balance from './ethBalance';
 
 const rootReducer = {
   reducer: {
@@ -34,8 +36,8 @@ export default wrapper;
 setupListeners(makeStore().dispatch);
 
 export type AppStore = ReturnType<typeof makeStore>;
-export type AppState = ReturnType<AppStore["getState"]>;
-export type AppDispatch = AppStore["dispatch"];
+export type AppState = ReturnType<AppStore['getState']>;
+export type AppDispatch = AppStore['dispatch'];
 export type AppThunk<ReturnType = void> = ThunkAction<
   ReturnType,
   AppState,

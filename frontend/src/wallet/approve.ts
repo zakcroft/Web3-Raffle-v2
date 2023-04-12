@@ -1,6 +1,8 @@
-import { useState, useCallback } from "react";
-import { useWeb3React } from "@web3-react/core";
-import { useContracts } from "./contracts";
+import { useCallback, useState } from 'react';
+
+import { useWeb3React } from '@web3-react/core';
+
+import { useContracts } from './contracts';
 
 export function useApproveTokens(quantity: number = 100) {
   const { account } = useWeb3React();

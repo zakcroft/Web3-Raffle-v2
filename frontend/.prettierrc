@@ -1,0 +1,10 @@
+{
+  "plugins": ["@trivago/prettier-plugin-sort-imports"],
+  "trailingComma": "all",
+  "singleQuote": true,
+  "useTabs": false,
+  "importOrder": ["^react", "^@redux", "^redux", "<THIRD_PARTY_MODULES>", "api", "routes", "store", "shared", "components", "utils", "assets", "styles", "^[./]"],
+  "importOrderSeparation": true,
+  "importOrderSortSpecifiers": true,
+  "importOrderGroupNamespaceSpecifiers": true
+}

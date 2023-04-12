@@ -30,7 +30,7 @@ module.exports = {
       chainId: 31337,
     },
     localhost: {
-      chainId: 31337,
+      chainId: 1337,
     },
     seploia: {
       url: process.env.SEPOLIA_URL_INFURA,

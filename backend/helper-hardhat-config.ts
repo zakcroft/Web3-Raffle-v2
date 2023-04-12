@@ -19,7 +19,7 @@ const tokenCost =  ethers.utils.parseUnits("0.1", "ether");
 
 const networkConfig: NetworkConfigType = {
   31337: {
-    name: 'localhost',
+    name: 'hardhat',
     subscriptionId: 9214,
     tokenCost,
     gasLane:

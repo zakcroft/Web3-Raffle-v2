@@ -1,47 +1,55 @@
-import Head from "next/head";
-import Image from "next/image";
-import { Inter } from "next/font/google";
-import styles from "@/styles/Home.module.css";
+import { useEffect, useState } from 'react';
 
-const inter = Inter({ subsets: ["latin"] });
+import { useEvmNativeBalance } from '@moralisweb3/next';
+import {
+  ConnectKitButton,
+  ConnectKitProvider,
+  getDefaultClient,
+} from 'connectkit';
+import { Inter } from 'next/font/google';
+import Head from 'next/head';
+import Image from 'next/image';
+import { useNetwork } from 'wagmi';
 
-import { useEvmNativeBalance } from "@moralisweb3/next";
+import styles from '@/styles/Home.module.css';
 
-import { useContractWrite, useContract, Web3Button, useChainId, ConnectWallet } from "@thirdweb-dev/react";
+import { abi, contractAddresses } from '../constants';
 
-import { abi, contractAddresses } from "../constants"
+const inter = Inter({ subsets: ['latin'] });
 
 interface contractAddressesInterface {
-  [key: string]: string[]
+  [key: string]: string[];
 }
 
 export default function App() {
-  const addresses: contractAddressesInterface = contractAddresses
-    const chainId = useChainId();
+  const [raffleAddress, setRaffleAddress] = useState('');
+  const addresses: contractAddressesInterface = contractAddresses;
+  const { chain } = useNetwork();
 
-  //const chainId: string = parseInt(chainIdHex!).toString()
-  const raffleAddress = chainId && chainId in addresses ? addresses[chainId][0] : ''
+  console.log('chain===', chain);
+
+  // const chainId: string = parseInt(chainIdHex!).toString()
+
   //const { data: nativeBalance } = useEvmNativeBalance({ raffleAddress });
   console.log(addresses);
+
+  useEffect(() => {
+    if (chain?.id) {
+      const raffleAddress = addresses[chain?.id][0];
+      if (raffleAddress) {
+        setRaffleAddress(raffleAddress);
+      }
+    }
+  }, [addresses, chain]);
   return (
     <>
       <main className={styles.main}>
         <div className={styles.description}>
           <div>
-            <h3>Wallet: {raffleAddress}</h3>
+            <h3>Raffle: {raffleAddress}</h3>
             {/*<h3>Native Balance: {nativeBalance?.balance.ether} ETH</h3>*/}
           </div>
-          <ConnectWallet
-              theme="dark"
-              btnTitle="Connect Wallet"
-          />
-          {/*<Web3Button*/}
-          {/*  onSuccess={() => console.log("success")}*/}
-          {/*  contractAddress={raffleAddress}*/}
-          {/*  action={async (contract) => contract.call("myFunctionName")}*/}
-          {/*>*/}
-          {/*  Call myFunctionName from the connected wallet*/}
-          {/*</Web3Button>*/}
+          <ConnectKitButton />
           <p className={'text-red p-20'}>
             TEST
             <code className={styles.code}>src/pages/index.tsx</code>
@@ -52,7 +60,7 @@ export default function App() {
               target="_blank"
               rel="noopener noreferrer"
             >
-              By{" "}
+              By{' '}
               <Image
                 src="/vercel.svg"
                 alt="Vercel Logo"

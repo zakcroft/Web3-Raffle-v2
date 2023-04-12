@@ -1,7 +1,6 @@
-import Web3 from "web3";
-import detectEthereumProvider from "@metamask/detect-provider";
-
-import { provider } from "web3-core";
+import detectEthereumProvider from '@metamask/detect-provider';
+import Web3 from 'web3';
+import { provider } from 'web3-core';
 
 export async function getWeb3() {
   // @ts-ignore
