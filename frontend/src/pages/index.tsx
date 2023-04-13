@@ -1,47 +1,34 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState } from "react";
 
-import { useEvmNativeBalance } from '@moralisweb3/next';
-import { Inter } from 'next/font/google';
-import Head from 'next/head';
-import Image from 'next/image';
+import { useEvmNativeBalance } from "@moralisweb3/next";
+import { Inter } from "next/font/google";
+import Head from "next/head";
+import Image from "next/image";
 
 import {
   ConnectKitButton,
   ConnectKitProvider,
   getDefaultClient,
-} from 'connectkit';
-import { useNetwork } from 'wagmi';
+} from "connectkit";
 
-import styles from '@/styles/Home.module.css';
+import { useBalance } from "wagmi";
 
-import { abi, contractAddresses } from '../constants';
+import styles from "@/styles/Home.module.css";
+import { useRaffle } from "@/hooks/useRaffle";
 
-const inter = Inter({ subsets: ['latin'] });
-
-interface contractAddressesInterface {
-  [key: string]: string[];
-}
+const inter = Inter({ subsets: ["latin"] });
 
 export default function App() {
-  const [raffleAddress, setRaffleAddress] = useState('');
-  const addresses: contractAddressesInterface = contractAddresses;
-  const { chain } = useNetwork();
+  const { abi, raffleAddress } = useRaffle();
 
-  console.log('chain===', chain);
+  const { data, isError, isLoading } = useBalance({
+    address: raffleAddress,
+  });
 
   // const chainId: string = parseInt(chainIdHex!).toString()
 
   //const { data: nativeBalance } = useEvmNativeBalance({ raffleAddress });
-  console.log(addresses);
 
-  useEffect(() => {
-    if (chain?.id) {
-      const raffleAddress = addresses[chain?.id][0];
-      if (raffleAddress) {
-        setRaffleAddress(raffleAddress);
-      }
-    }
-  }, [addresses, chain]);
   return (
     <>
       <main className={styles.main}>
@@ -51,7 +38,7 @@ export default function App() {
             {/*<h3>Native Balance: {nativeBalance?.balance.ether} ETH</h3>*/}
           </div>
           <ConnectKitButton />
-          <p className={'text-red p-20'}>
+          <p className={"text-red p-20"}>
             TEST
             <code className={styles.code}>src/pages/index.tsx</code>
           </p>
@@ -61,7 +48,7 @@ export default function App() {
               target="_blank"
               rel="noopener noreferrer"
             >
-              By{' '}
+              By{" "}
               <Image
                 src="/vercel.svg"
                 alt="Vercel Logo"
