@@ -1,14 +1,15 @@
 import { useEffect, useState } from 'react';
 
 import { useEvmNativeBalance } from '@moralisweb3/next';
+import { Inter } from 'next/font/google';
+import Head from 'next/head';
+import Image from 'next/image';
+
 import {
   ConnectKitButton,
   ConnectKitProvider,
   getDefaultClient,
 } from 'connectkit';
-import { Inter } from 'next/font/google';
-import Head from 'next/head';
-import Image from 'next/image';
 import { useNetwork } from 'wagmi';
 
 import styles from '@/styles/Home.module.css';

@@ -1,5 +1,8 @@
 import { Provider } from 'react-redux';
 
+import type { AppProps } from 'next/app';
+import Head from 'next/head';
+
 // const { provider } = configureChains(chains, [w3mProvider({ projectId })]);
 // const wagmiClient = createClient({
 //     autoConnect: true,
@@ -7,8 +10,6 @@ import { Provider } from 'react-redux';
 //     provider,
 // });
 import { ConnectKitProvider, getDefaultClient } from 'connectkit';
-import type { AppProps } from 'next/app';
-import Head from 'next/head';
 import { WagmiConfig, createClient } from 'wagmi';
 import { hardhat, localhost, mainnet, polygon, sepolia } from 'wagmi/chains';
 
