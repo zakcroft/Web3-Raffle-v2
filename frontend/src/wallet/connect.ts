@@ -1,10 +1,10 @@
-import { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 
-import { useWeb3React } from '@web3-react/core';
-import { InjectedConnector } from '@web3-react/injected-connector';
+import { useWeb3React } from "@web3-react/core";
+import { InjectedConnector } from "@web3-react/injected-connector";
 
-import { IS_Wallet_Connected_KEY } from '../constants';
+import { IS_Wallet_Connected_KEY } from "../constants";
 
 export interface ProviderRpcError extends Error {
   message: string;
@@ -23,8 +23,8 @@ export function useConnectWallet() {
   async function connect() {
     try {
       await activate(injected);
-      localStorage.setItem(IS_Wallet_Connected_KEY, 'true');
-      navigate('home');
+      localStorage.setItem(IS_Wallet_Connected_KEY, "true");
+      navigate("home");
     } catch (ex) {
       //console.log(ex);
     }
@@ -33,15 +33,15 @@ export function useConnectWallet() {
   async function disconnect() {
     try {
       deactivate();
-      localStorage.setItem(IS_Wallet_Connected_KEY, 'false');
-      navigate('/');
+      localStorage.setItem(IS_Wallet_Connected_KEY, "false");
+      navigate("/");
     } catch (ex) {
       //console.log(ex);
     }
   }
 
   const isWalletConnected = () => {
-    return localStorage.getItem(IS_Wallet_Connected_KEY) === 'true';
+    return localStorage.getItem(IS_Wallet_Connected_KEY) === "true";
   };
 
   useEffect(() => {
@@ -49,40 +49,40 @@ export function useConnectWallet() {
       const { currentProvider } = library;
 
       const handleAccountsChanged = (accounts: string[]) => {
-        console.log('accountsChanged');
+        console.log("accountsChanged");
         if (accounts.length > 0) {
-          console.log('reactivate');
+          console.log("reactivate");
           activate(injected, undefined, true).catch((error) => {
             // eat errors
-            console.error('Failed to activate after accounts changed', error);
+            console.error("Failed to activate after accounts changed", error);
           });
         } else {
-          disconnect().then(() => navigate('/'));
+          disconnect().then(() => navigate("/"));
         }
       };
 
       // Subscribe to accounts change
-      currentProvider.on('accountsChanged', handleAccountsChanged);
+      currentProvider.on("accountsChanged", handleAccountsChanged);
 
       // Subscribe to chainId change
-      currentProvider.on('chainChanged', (chainId: number) => {
-        console.log('chainChanged');
+      currentProvider.on("chainChanged", (chainId: number) => {
+        console.log("chainChanged");
         console.log(chainId);
       });
 
       // Subscribe to provider connection
-      currentProvider.on('connect', (info: { chainId: number }) => {
-        console.log('connect');
+      currentProvider.on("connect", (info: { chainId: number }) => {
+        console.log("connect");
         console.log(info);
       });
 
       // Subscribe to provider disconnection
       currentProvider.on(
-        'disconnect',
+        "disconnect",
         (error: { code: number; message: string }) => {
-          console.log('disconnect');
+          console.log("disconnect");
           console.log(error);
-        },
+        }
       );
     }
     return () => library?.currentProvider.removeAllListeners();
@@ -90,10 +90,10 @@ export function useConnectWallet() {
 
   useEffect(() => {
     const connectWalletOnPageLoad = async () => {
-      if (localStorage?.getItem(IS_Wallet_Connected_KEY) === 'true') {
+      if (localStorage?.getItem(IS_Wallet_Connected_KEY) === "true") {
         try {
           await activate(injected);
-          navigate('/home');
+          navigate("/home");
         } catch (ex) {
           console.log(ex);
         }

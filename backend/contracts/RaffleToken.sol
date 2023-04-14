@@ -25,4 +25,8 @@ contract RaffleToken is ERC20Capped, ERC20Burnable, Ownable {
     ) internal override(ERC20, ERC20Capped) {
         ERC20Capped._mint(account, amount);
     }
+
+    function decimals() public view virtual override returns (uint8) {
+        return 0;
+    }
 }
