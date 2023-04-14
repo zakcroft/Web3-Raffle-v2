@@ -11,30 +11,91 @@ import {
   getDefaultClient,
 } from "connectkit";
 
-import { useBalance } from "wagmi";
+import {
+  useAccount,
+  useBalance,
+  useNetwork,
+  useContractReads,
+  usePrepareContractWrite,
+  useContractWrite,
+  useContract,
+} from "wagmi";
 
 import styles from "@/styles/Home.module.css";
 import { useRaffle } from "@/hooks/useRaffle";
+import { ethers } from "ethers";
 
 const inter = Inter({ subsets: ["latin"] });
 
 export default function App() {
-  const { abi, raffleAddress } = useRaffle();
+  const { raffleAbi, raffleAddress, raffleTokenAbi, raffleTokenAddress } =
+    useRaffle();
+  const { address } = useAccount();
 
-  const { data, isError, isLoading } = useBalance({
+  const accountBalance = useBalance({
+    address,
+  });
+
+  const raffleBalance = useBalance({
     address: raffleAddress,
   });
 
-  // const chainId: string = parseInt(chainIdHex!).toString()
+  const raffleTokenAddressBalance = useBalance({
+    address: address,
+    token: raffleTokenAddress,
+  });
 
-  //const { data: nativeBalance } = useEvmNativeBalance({ raffleAddress });
+  const tokenCost = ethers.utils.parseUnits("0.1", "ether");
+
+  console.log("address", address);
+  console.log("tokenCost", tokenCost);
+  console.log("raffleTokenAddressBalance", raffleTokenAddressBalance.data);
+  console.log("raffleAddress", raffleAddress);
+
+  const { config } = usePrepareContractWrite({
+    address: raffleAddress,
+    abi: raffleAbi,
+    functionName: "buyRaffleTokens",
+    overrides: {
+      from: address,
+      value: tokenCost,
+    },
+  });
+  const { data, isLoading, isSuccess, write } = useContractWrite(config);
+
+  // console.log(raffleBalance.data);
+  // console.log(accountBalance.data);
+  // console.log(config);
+  // console.log(data);
+  // console.log(write);
+  // const chainId: string = parseInt(chainIdHex!).toString()
+  // const { data: nativeBalance } = useEvmNativeBalance({ raffleAddress });
+
+  // const raffleTokenContract = useContract({
+  //   address: raffleTokenAddress,
+  //   abi: raffleTokenAbi,
+  // });
+
+  //raffleTokenContract.balanceOf(account);
 
   return (
     <>
+      <button disabled={!write} onClick={() => write?.()}>
+        Buy Raffle Tokens
+      </button>
       <main className={styles.main}>
         <div className={styles.description}>
           <div>
             <h3>Raffle: {raffleAddress}</h3>
+            <h3>
+              raffleTokenAddressBalance:{" "}
+              {raffleTokenAddressBalance.data
+                ? ethers.utils.formatUnits(
+                    raffleTokenAddressBalance.data?.value,
+                    "ether"
+                  )
+                : "0"}
+            </h3>
             {/*<h3>Native Balance: {nativeBalance?.balance.ether} ETH</h3>*/}
           </div>
           <ConnectKitButton />
