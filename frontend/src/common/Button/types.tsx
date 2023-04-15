@@ -1,6 +1,6 @@
-import { ComponentPropsWithoutRef } from "react";
+import { ComponentPropsWithoutRef } from 'react';
 
-export interface IButton extends ComponentPropsWithoutRef<"button"> {
+export interface IButton extends ComponentPropsWithoutRef<'button'> {
   classType?: keyof IClassType;
   colour?: keyof IColours;
   classOverrides?: string;

@@ -1,6 +1,6 @@
-import { PayloadAction, createSlice } from "@reduxjs/toolkit";
+import { PayloadAction, createSlice } from '@reduxjs/toolkit';
 
-import type { AppState } from "./";
+import type { AppState } from './';
 
 // Define a type for the slice state
 interface CounterState {
@@ -13,7 +13,7 @@ const initialState: CounterState = {
 };
 
 export const counter = createSlice({
-  name: "count",
+  name: 'count',
   // `createSlice` will infer the state type from the `initialState` argument
   initialState,
   reducers: {

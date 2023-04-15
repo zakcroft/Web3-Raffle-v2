@@ -1,8 +1,8 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState } from 'react';
 
-import { twMerge } from "tailwind-merge";
+import { twMerge } from 'tailwind-merge';
 
-import type { IButton, IColours } from "./types";
+import type { IButton, IColours } from './types';
 
 const classTypes: {
   [key: string]: {
@@ -14,8 +14,8 @@ const classTypes: {
 } = {
   button: {
     base: `min-w-[120px] font-medium rounded-lg text-sm px-5 py-2.5 text-center`,
-    active: "focus:ring-2 focus:outline-none",
-    disabled: "cursor-not-allowed",
+    active: 'focus:ring-2 focus:outline-none',
+    disabled: 'cursor-not-allowed',
     colour: {
       white: {
         base: `focus:ring-2 focus:outline-none`,
@@ -23,17 +23,17 @@ const classTypes: {
         disabled: ``,
       },
       silver: {
-        base: "focus:ring-2 focus:outline-none",
+        base: 'focus:ring-2 focus:outline-none',
         active:
-          "text-black bg-gray-300 hover:bg-gray-400 focus:ring-silver-300 hover:text-silver-700 focus:bg-silver-300 focus:ring-silver-500",
-        disabled: "text-gray-500 bg-gray-200 cursor-not-allowed",
+          'text-black bg-gray-300 hover:bg-gray-400 focus:ring-silver-300 hover:text-silver-700 focus:bg-silver-300 focus:ring-silver-500',
+        disabled: 'text-gray-500 bg-gray-200 cursor-not-allowed',
       },
     },
   },
   link: {
     base: `text-sm `,
-    active: "",
-    disabled: "cursor-not-allowed",
+    active: '',
+    disabled: 'cursor-not-allowed',
     colour: {
       white: {
         base: ``,
@@ -50,11 +50,11 @@ const classTypes: {
 };
 
 export const Button = ({
-  type = "button",
-  className = "",
-  classOverrides = "",
-  classType = "button",
-  colour = "silver",
+  type = 'button',
+  className = '',
+  classOverrides = '',
+  classType = 'button',
+  colour = 'silver',
   children,
   disabled,
   isLoading,
@@ -76,15 +76,15 @@ export const Button = ({
   }, [isLoading]);
 
   const classes = classTypes[classType];
-  const classBases = classes["base"];
+  const classBases = classes['base'];
 
   const defaultClasses =
-    disabled || isLoading ? classes["disabled"] : classes["active"];
+    disabled || isLoading ? classes['disabled'] : classes['active'];
 
-  const classColour = classes["colour"][colour];
-  const classColourBases = classColour["base"];
+  const classColour = classes['colour'][colour];
+  const classColourBases = classColour['base'];
   const defaultColourClasses =
-    disabled || isLoading ? classColour["disabled"] : classColour["active"];
+    disabled || isLoading ? classColour['disabled'] : classColour['active'];
 
   return (
     <button
@@ -97,12 +97,12 @@ export const Button = ({
           defaultClasses,
           classColourBases,
           defaultColourClasses,
-          classOverrides
+          classOverrides,
         )
       }
       {...rest}
     >
-      {children} {showRequestDelayFeedback ? "..." : ""}
+      {children} {showRequestDelayFeedback ? '...' : ''}
     </button>
   );
 };

@@ -1,15 +1,15 @@
-import { Provider } from "react-redux";
+import { Provider } from 'react-redux';
 
-import type { AppProps } from "next/app";
-import Head from "next/head";
+import type { AppProps } from 'next/app';
+import Head from 'next/head';
 
-import { ConnectKitProvider, getDefaultClient } from "connectkit";
-import { WagmiConfig, createClient } from "wagmi";
-import { hardhat, localhost, mainnet, polygon, sepolia } from "wagmi/chains";
+import { ConnectKitProvider, getDefaultClient } from 'connectkit';
+import { WagmiConfig, createClient } from 'wagmi';
+import { hardhat, localhost, mainnet, polygon, sepolia } from 'wagmi/chains';
 
-import wrapper from "../store";
+import wrapper from '../store';
 
-import "@/styles/globals.css";
+import '@/styles/globals.css';
 
 const chains = [mainnet, polygon, sepolia, hardhat];
 
@@ -17,10 +17,10 @@ const infuraId = process.env.NEXT_PUBLIC_SEPOLIA_URL_INFURA;
 
 const client = createClient(
   getDefaultClient({
-    appName: "Raffle",
+    appName: 'Raffle',
     infuraId,
     chains,
-  })
+  }),
 );
 
 export default function App({ Component, ...rest }: AppProps) {

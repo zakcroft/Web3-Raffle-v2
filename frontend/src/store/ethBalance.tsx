@@ -1,6 +1,6 @@
-import { PayloadAction, createSlice } from "@reduxjs/toolkit";
+import { PayloadAction, createSlice } from '@reduxjs/toolkit';
 
-import type { AppState } from "./";
+import type { AppState } from './';
 
 // Define a type for the slice state
 interface BalanceState {
@@ -9,11 +9,11 @@ interface BalanceState {
 
 // Define the initial state using that type
 const initialState: BalanceState = {
-  value: "",
+  value: '',
 };
 
 export const balance = createSlice({
-  name: "balance",
+  name: 'balance',
   // `createSlice` will infer the state type from the `initialState` argument
   initialState,
   reducers: {

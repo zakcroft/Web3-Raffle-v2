@@ -12,6 +12,7 @@
   "dependencies": {
     "@moralisweb3/next": "^2.18.1",
     "@reduxjs/toolkit": "^1.9.3",
+    "@wagmi/core": "^0.10.9",
     "autoprefixer": "^10.4.14",
     "connectkit": "^1.2.2",
     "ethers": "^5.7.2",
