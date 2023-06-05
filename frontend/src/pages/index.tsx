@@ -1,42 +1,46 @@
 import { useEffect, useState } from 'react';
-
-import { useEvmNativeBalance } from '@moralisweb3/next';
+import { parseUnits, formatUnits, parseEther } from 'viem';
+// import { useEvmNativeBalance } from '@moralisweb3/next';
 import { Inter } from 'next/font/google';
 
 import { Button } from '@/common/Button';
 
+
+
 import { ConnectKitButton } from 'connectkit';
-import { fetchBalance, getAccount } from '@wagmi/core';
+// import { fetchBalance, getAccount } from '@wagmi/core';
 import {
   useAccount,
   useBalance,
-  useNetwork,
-  useContractReads,
+  // useNetwork,
+  // useContractReads,
   usePrepareContractWrite,
   useContractWrite,
-  useContract,
-  Address,
+  // useContract,
+  // Address,
 } from 'wagmi';
 
 import { useRaffle } from '@/hooks/useRaffle';
-import { ethers } from 'ethers';
+
 import { Left, Main } from '@/common/Layouts';
-import { GetServerSideProps } from 'next';
+import {getAccountBalance} from "@/utils";
+// import { GetServerSideProps } from 'next';
+// import { getTokenAllowanceOperation } from '@moralisweb3/common-evm-utils';
 
 const inter = Inter({ subsets: ['latin'] });
 
 export default function App() {
   //const [raffleTokenAddressBalance, setUpdateCounter] = useState(0);
-  const [fetchedAccountBalance, setFetchedAccountBalance] = useState('0');
+  const [fetchedAccountBalance, setFetchedAccountBalance] = useState<bigint>(0n);
 
   const { raffleAbi, raffleAddress, raffleTokenAbi, raffleTokenAddress } =
     useRaffle();
 
-  const { address } = useAccount();
+  const { address } = useAccount()
 
   const accountBalance = useBalance({
     address,
-  });
+  })
 
   const raffleBalance = useBalance({
     address: raffleAddress,
@@ -47,31 +51,40 @@ export default function App() {
     token: raffleTokenAddress,
   });
 
-  const tokenCost = ethers.utils.parseUnits('0.1', 'ether');
+  const tokenCost = parseUnits('0.1', 18);
 
   const { config } = usePrepareContractWrite({
     address: raffleAddress,
     abi: raffleAbi,
     functionName: 'buyRaffleTokens',
-    overrides: {
-      from: address,
-      value: tokenCost,
-    },
+    account: address,
+    value: tokenCost,
   });
 
   const { isSuccess, write } = useContractWrite(config);
 
+  // console.log('fetchedAccountBalance ===', fetchedAccountBalance);
+  // console.log('address ===', address);
+  //console.log('accountBalance ===', accountBalance);
+  // console.log(typeof tokenCost);
+  // console.log(tokenCost);
+  // console.log(isSuccess);
+
   useEffect(() => {
     if (isSuccess) {
       raffleTokenBalance.refetch().then((data) => {
-        console.log('refetch', data);
+        console.log('refetch raffleTokenBalance', data);
+      });
+      accountBalance.refetch().then((data) => {
+        console.log('refetch accountBalance', data);
       });
     }
-  }, [isSuccess, raffleTokenBalance]);
+  }, [accountBalance, isSuccess, raffleTokenBalance]);
 
   useEffect(() => {
     if (accountBalance.data?.value) {
-      setFetchedAccountBalance(accountBalance.data.value.toString());
+      const val = getAccountBalance(accountBalance)
+      setFetchedAccountBalance(val);
     }
   }, [accountBalance]);
 
@@ -92,9 +105,7 @@ export default function App() {
             }
           >
             Wallet balance:{' '}
-            {Number(
-              ethers.utils.formatUnits(fetchedAccountBalance, 'ether'),
-            ).toFixed(2)}
+            {Number(formatUnits(fetchedAccountBalance, 18)).toFixed(2)}
           </h1>
         </div>
       </header>

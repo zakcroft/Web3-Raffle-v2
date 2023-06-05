@@ -5,7 +5,7 @@ interface contractAddressesInterface {
   [key: number]: string[];
 }
 
-import { raffleAbi, raffleTokenAbi, contractAddresses } from '../constants';
+import { raffleAbi, raffleTokenAbi, contractAddresses } from '../abis';
 
 export const useRaffle = () => {
   const [raffleAddress, setRaffleAddress] = useState<Address>(`0x` as Address);
@@ -23,5 +23,10 @@ export const useRaffle = () => {
     }
   }, [addresses, chain]);
 
-  return { raffleAbi, raffleTokenAbi, raffleAddress, raffleTokenAddress };
+  return {
+    raffleAbi,
+    raffleTokenAbi,
+    raffleAddress,
+    raffleTokenAddress,
+  } as const;
 };

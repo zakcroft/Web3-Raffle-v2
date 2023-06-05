@@ -9,6 +9,7 @@ export interface networkConfigItem {
   callbackGasLimit?: number;
   tokenCost?: BigNumber;
   automationUpdateInterval?: number;
+  uploadNfts?: boolean;
 }
 
 interface NetworkConfigType {
@@ -26,6 +27,7 @@ const networkConfig: NetworkConfigType = {
       "0xd89b2bf150e3b9e13446986e571fb9cab24b13cea0a43ea20a6049a85cc807cc", //this is mocked
     callbackGasLimit: 2500000, // 2500000 === maxGasLimit // cost 137501 ?
     automationUpdateInterval: 30,
+    uploadNfts:false
   },
   4: {
     name: "sepolia",
@@ -52,14 +54,9 @@ const networkConfig: NetworkConfigType = {
 const developmentChains: string[] = ["hardhat", "localhost"];
 const frontEndContractsFile =
   "../frontend/src/constants/contractAddresses.json";
-const frontEndRaffleAbiFile = "../frontend/src/constants/raffleAbi.json";
-const frontEndRaffleTokenAbiFile =
-  "../frontend/src/constants/raffleTokenAbi.json";
 
 export {
   networkConfig,
   developmentChains,
-  frontEndContractsFile,
-  frontEndRaffleAbiFile,
-  frontEndRaffleTokenAbiFile,
+  frontEndContractsFile
 };

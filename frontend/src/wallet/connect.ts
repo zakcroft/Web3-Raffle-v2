@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { useWeb3React } from '@web3-react/core';
 import { InjectedConnector } from '@web3-react/injected-connector';
 
-import { IS_Wallet_Connected_KEY } from '../constants';
+import { IS_Wallet_Connected_KEY } from '../abis';
 
 export interface ProviderRpcError extends Error {
   message: string;

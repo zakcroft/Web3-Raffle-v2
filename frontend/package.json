@@ -10,32 +10,34 @@
     "prettier": "prettier --write '{src/**/*.{js,ts,css,html,tsx},test/*.js,.json}'"
   },
   "dependencies": {
-    "@moralisweb3/next": "^2.18.1",
-    "@reduxjs/toolkit": "^1.9.3",
-    "@wagmi/core": "^0.10.9",
+    "@moralisweb3/next": "^2.22.0",
+    "@reduxjs/toolkit": "^1.9.5",
+    "@wagmi/core": "^1.1.0",
     "autoprefixer": "^10.4.14",
-    "connectkit": "^1.2.2",
-    "ethers": "^5.7.2",
-    "moralis": "^2.18.1",
-    "next": "13.2.4",
-    "next-auth": "^4.20.1",
+    "browserify-fs": "^1.0.0",
+    "connectkit": "^1.4.0",
+    "moralis": "^2.22.0",
+    "next": "13.4.4",
+    "next-auth": "^4.22.1",
     "next-redux-wrapper": "^8.1.0",
-    "postcss": "^8.4.21",
+    "postcss": "^8.4.24",
     "postcss-import": "^15.1.0",
-    "react": "18.2.0",
-    "react-dom": "18.2.0",
-    "react-redux": "^8.0.5",
-    "tailwind-merge": "^1.12.0",
-    "tailwindcss": "^3.3.0",
-    "wagmi": "^0.12.10"
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-redux": "^8.0.7",
+    "tailwind-merge": "^1.13.0",
+    "tailwindcss": "^3.3.2",
+    "viem": "^0.3.50",
+    "wagmi": "^1.1.0"
   },
   "devDependencies": {
-    "@types/node": "^18.11.11",
-    "@types/react": "^18.0.33",
-    "@types/react-dom": "18.0.11",
-    "eslint": "8.37.0",
-    "eslint-config-next": "13.2.4",
-    "prettier": "^2.8.7",
-    "typescript": "5.0.4"
+    "@types/node": "^20.2.5",
+    "@types/react": "^18.2.8",
+    "@types/react-dom": "^18.2.4",
+    "eslint": "^8.41.0",
+    "eslint-config-next": "^13.4.4",
+    "prettier": "^2.8.8",
+    "typescript": "^5.1.3"
   }
+
 }

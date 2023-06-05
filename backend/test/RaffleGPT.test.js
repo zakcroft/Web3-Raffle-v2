@@ -26,7 +26,9 @@ describe("Raffle Contract", function () {
       // Execute buyRaffleTokens()
       const tokenCost = await raffleContract.i_tokenCost();
       const purchaseValue = tokenCost.mul(2);
-      await raffleContract.connect(addr1).buyRaffleTokens({ value: purchaseValue });
+      await raffleContract
+        .connect(addr1)
+        .buyRaffleTokens({ value: purchaseValue });
 
       // Check the results
       const addr1Balance = await token.balanceOf(addr1.address);
@@ -36,18 +38,24 @@ describe("Raffle Contract", function () {
       expect(contractBalance).to.equal(initialTokens.sub(2));
 
       const addr1EtherBalance = await ethers.provider.getBalance(addr1.address);
-      expect(addr1EtherBalance).to.be.lt(ethers.utils.parseEther("100").sub(purchaseValue));
+      expect(addr1EtherBalance).to.be.lt(
+        ethers.utils.parseEther("100").sub(purchaseValue)
+      );
     });
 
     it("should fail when buying less than the token cost", async function () {
       const purchaseValue = (await raffleContract.i_tokenCost()).div(2);
-      await expect(raffleContract.connect(addr1).buyRaffleTokens({ value: purchaseValue })).to.be.revertedWith("Raffle__SendMoreToEnterRaffle");
+      await expect(
+        raffleContract.connect(addr1).buyRaffleTokens({ value: purchaseValue })
+      ).to.be.revertedWith("Raffle__SendMoreToEnterRaffle");
     });
 
     it("should fail when buying partial tokens", async function () {
       const tokenCost = await raffleContract.i_tokenCost();
       const purchaseValue = tokenCost.mul(2).add(1);
-      await expect(raffleContract.connect(addr1).buyRaffleTokens({ value: purchaseValue })).to.be.revertedWith("Raffle__CannotBuyPartialTokens");
+      await expect(
+        raffleContract.connect(addr1).buyRaffleTokens({ value: purchaseValue })
+      ).to.be.revertedWith("Raffle__CannotBuyPartialTokens");
     });
 
     it("should fail when there are not enough tokens available", async function () {
@@ -56,7 +64,9 @@ describe("Raffle Contract", function () {
 
       const tokenCost = await raffleContract.i_tokenCost();
       const purchaseValue = tokenCost.mul(2);
-      await expect(raffleContract.connect(addr1).buyRaffleTokens({ value: purchaseValue })).to.be.revertedWith("Raffle__RaffleDoesNotHaveEnoughTokens");
+      await expect(
+        raffleContract.connect(addr1).buyRaffleTokens({ value: purchaseValue })
+      ).to.be.revertedWith("Raffle__RaffleDoesNotHaveEnoughTokens");
     });
 
     //These tests cover the main scenarios for the buyRaffleTokens function,
@@ -79,10 +89,9 @@ describe("Raffle Contract", function () {
 
       const tokenCost = await raffleContract.i_tokenCost();
       const purchaseValue = tokenCost.mul(2);
-      await expect(raffleContract.connect(addr1).buyRaffleTokens({ value: purchaseValue })).to.be.revertedWith("Raffle__TransferFailed");
+      await expect(
+        raffleContract.connect(addr1).buyRaffleTokens({ value: purchaseValue })
+      ).to.be.revertedWith("Raffle__TransferFailed");
     });
   });
 });
-
-
-

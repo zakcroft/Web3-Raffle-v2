@@ -3,23 +3,31 @@ import { Provider } from 'react-redux';
 import type { AppProps } from 'next/app';
 import Head from 'next/head';
 
-import { ConnectKitProvider, getDefaultClient } from 'connectkit';
-import { WagmiConfig, createClient } from 'wagmi';
-import { hardhat, localhost, mainnet, polygon, sepolia } from 'wagmi/chains';
+import { ConnectKitProvider, getDefaultConfig } from 'connectkit';
+import { WagmiConfig, createConfig, configureChains } from 'wagmi';
+import { publicProvider } from 'wagmi/providers/public';
+import { infuraProvider } from '@wagmi/core/providers/infura';
+
+import { mainnet, sepolia, polygon, hardhat, localhost } from 'wagmi/chains';
 
 import wrapper from '../store';
 
 import '@/styles/globals.css';
 
-const chains = [mainnet, polygon, sepolia, hardhat];
+const { chains, publicClient } = configureChains(
+  [mainnet, polygon, sepolia, hardhat],
+  [
+    infuraProvider({ apiKey: process.env.NEXT_PUBLIC_SEPOLIA_URL_INFURA }),
+    publicProvider(),
+  ],
+);
 
-const infuraId = process.env.NEXT_PUBLIC_SEPOLIA_URL_INFURA;
-
-const client = createClient(
-  getDefaultClient({
+const config = createConfig(
+  getDefaultConfig({
     appName: 'Raffle',
-    infuraId,
     chains,
+    publicClient,
+    walletConnectProjectId: process.env.NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID,
   }),
 );
 
@@ -29,7 +37,7 @@ export default function App({ Component, ...rest }: AppProps) {
 
   return (
     <>
-      <WagmiConfig client={client}>
+      <WagmiConfig config={config}>
         <ConnectKitProvider options={{ initialChainId: 0 }}>
           <Provider store={store}>
             <Head>

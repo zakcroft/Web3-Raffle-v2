@@ -1,19 +1,19 @@
-import { ethers, getNamedAccounts } from 'hardhat';
+import { ethers, getNamedAccounts } from "hardhat";
 
-import { BigNumber } from 'ethers';
+import { BigNumber } from "ethers";
 
-import { logStats } from './logStats';
+import { logStats } from "./logStats";
 
 export async function buyRaffleTokens() {
   const accounts = await getNamedAccounts();
   const player = accounts.player;
 
-  await logStats('START OF BUY RAFFLE TOKENS');
+  await logStats("START OF BUY RAFFLE TOKENS");
 
-  const raffle = await ethers.getContract('Raffle', player);
+  const raffle = await ethers.getContract("Raffle", player);
 
   const tokenCost = await raffle.getTokenCost();
-  console.log('Token Cost ETH', ethers.utils.formatEther(tokenCost.toString()));
+  console.log("Token Cost ETH", ethers.utils.formatEther(tokenCost.toString()));
 
   // buy tokens
   const amountToBuy = 20;
@@ -22,10 +22,10 @@ export async function buyRaffleTokens() {
 
   console.log(
     `Bought ${amountToBuy} Raffle Tokens Cost ETH:`,
-    ethers.utils.formatEther(tokensToBuy.toString()),
+    ethers.utils.formatEther(tokensToBuy.toString())
   );
 
-  await logStats('END OF BUY RAFFLE TOKENS');
+  await logStats("END OF BUY RAFFLE TOKENS");
 }
 
 buyRaffleTokens()

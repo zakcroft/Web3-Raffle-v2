@@ -1,14 +1,14 @@
-import { ethers, network } from 'hardhat';
+import { ethers, network } from "hardhat";
 
-import { BigNumber } from 'ethers';
+import { BigNumber } from "ethers";
 
-import { Raffle, VRFCoordinatorV2Mock } from '../typechain-types';
-import { logStats } from './logStats';
+import { Raffle, VRFCoordinatorV2Mock } from "../typechain-types";
+import { logStats } from "./logStats";
 
 export async function vrfDrawRaffle() {
-  const raffle: Raffle = await ethers.getContract('Raffle');
-  console.log('Running mockKeepers with raffle.address', raffle.address);
-  const checkData = ethers.utils.keccak256(ethers.utils.toUtf8Bytes(''));
+  const raffle: Raffle = await ethers.getContract("Raffle");
+  console.log("Running mockKeepers with raffle.address", raffle.address);
+  const checkData = ethers.utils.keccak256(ethers.utils.toUtf8Bytes(""));
   const { triggerRaffleDaw } = await raffle.callStatic.checkUpkeep(checkData);
   if (triggerRaffleDaw) {
     const tx = await raffle.performUpkeep(checkData);
@@ -21,33 +21,33 @@ export async function vrfDrawRaffle() {
       await mockVrf(requestId, raffle);
     }
   } else {
-    console.log('Not enough time has passed');
-    console.log('Last draw', (await raffle.getLastDrawTimeStamp()).toString());
-    console.log('Next draw', (await raffle.getNextDrawTimeStamp()).toString());
+    console.log("Not enough time has passed");
+    console.log("Last draw", (await raffle.getLastDrawTimeStamp()).toString());
+    console.log("Next draw", (await raffle.getNextDrawTimeStamp()).toString());
     console.log(
-      'Difference',
-      (await raffle.getCountDownToDrawTimeStamp()).toString(),
+      "Difference",
+      (await raffle.getCountDownToDrawTimeStamp()).toString()
     );
     const currentBlock = await ethers.provider.getBlockNumber();
     const blockTimestamp = (await ethers.provider.getBlock(currentBlock))
       .timestamp;
     console.log(blockTimestamp);
     const date = new Date(blockTimestamp * 1000); // Date requires ms, whereas block.timestamp is in s
-    console.log('blockTimestamp', blockTimestamp);
-    console.log('blockTimes', date);
+    console.log("blockTimestamp", blockTimestamp);
+    console.log("blockTimes", date);
   }
 }
 
 async function mockVrf(requestId: BigNumber, raffle: Raffle) {
   const vrfCoordinatorV2Mock: VRFCoordinatorV2Mock = await ethers.getContract(
-    'VRFCoordinatorV2Mock',
+    "VRFCoordinatorV2Mock"
   );
   await vrfCoordinatorV2Mock.fulfillRandomWords(requestId, raffle.address);
 
   const recentWinner = await raffle.getLastWinner();
   console.log(`The winner is: ${recentWinner}`);
 
-  await logStats('After VRF draw');
+  await logStats("After VRF draw");
 }
 
 vrfDrawRaffle()

@@ -1,19 +1,19 @@
-import { ethers, getNamedAccounts } from 'hardhat';
+import { ethers, getNamedAccounts } from "hardhat";
 
-import { logStats } from './logStats';
+import { logStats } from "./logStats";
 
 async function openRaffle() {
   const accounts = await getNamedAccounts();
   const owner = accounts.deployer;
 
-  console.log('Opening raffle');
+  console.log("Opening raffle");
 
-  const raffle = await ethers.getContract('Raffle', owner);
+  const raffle = await ethers.getContract("Raffle", owner);
   await raffle.openRaffle();
 
-  await logStats('OPEN RAFFLE');
+  await logStats("OPEN RAFFLE");
 
-  console.log('Raffle open');
+  console.log("Raffle open");
 }
 
 openRaffle()

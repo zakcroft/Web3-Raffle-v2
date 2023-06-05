@@ -1,17 +1,17 @@
-import { ethers, getNamedAccounts } from 'hardhat';
+import { ethers, getNamedAccounts } from "hardhat";
 
-import { BigNumber } from 'ethers';
+import { BigNumber } from "ethers";
 
-import { logStats } from './logStats';
+import { logStats } from "./logStats";
 
 export async function enterRaffle() {
   const accounts = await getNamedAccounts();
   const player = accounts.player;
 
-  const raffle = await ethers.getContract('Raffle', player);
-  const raffleToken = await ethers.getContract('RaffleToken', player);
+  const raffle = await ethers.getContract("Raffle", player);
+  const raffleToken = await ethers.getContract("RaffleToken", player);
 
-  const amountToEnter = BigNumber.from('10');
+  const amountToEnter = BigNumber.from("10");
 
   // Approve the raffle to spend the tokens
   await raffleToken.increaseAllowance(raffle.address, amountToEnter.toString());
@@ -21,12 +21,12 @@ export async function enterRaffle() {
   await raffle.enterRaffle(amountToEnter);
 
   console.log(
-    'Entered Raffle contract with',
+    "Entered Raffle contract with",
     allowanceSet.toString(),
-    'token(s)',
+    "token(s)"
   );
 
-  await logStats('After enter');
+  await logStats("After enter");
 }
 
 enterRaffle()
