@@ -1,15 +1,14 @@
 import * as path from "path";
 
-const { frontEndContractsFile } = require("../helper-hardhat-config");
 const fs = require("fs");
 const { network, ethers, artifacts } = require("hardhat");
 
 module.exports = async () => {
   if (process.env.UPDATE_FRONT_END) {
     console.log("Writing to front end...");
-    await updateContractAddresses();
     await saveAbi("Raffle");
     await saveAbi("RaffleToken");
+    await updateContractAddresses();
     console.log("Front end written!");
   }
 };
@@ -23,13 +22,7 @@ const fileExists = async (path: string) => {
   }
 };
 
-function lowercaseFirstLetter(string) {
-  return string.charAt(0).toLowerCase() + string.slice(1);
-}
-
-const saveAbi = async (smartContractName: string) => {
-  // Check if abi dir exists
-  const pathToDir = path.join(__dirname, "../../", `frontend/src/abis`);
+async function createDirIfNotExist(pathToDir: string) {
   if (!(await fileExists(pathToDir))) {
     try {
       await fs.promises.mkdir(pathToDir);
@@ -38,15 +31,13 @@ const saveAbi = async (smartContractName: string) => {
       console.error(err);
     }
   }
+}
 
-  // Get artifact
-  const artifact = await artifacts.readArtifact(smartContractName);
+function lowercaseFirstLetter(string) {
+  return string.charAt(0).toLowerCase() + string.slice(1);
+}
 
-  const name = `${lowercaseFirstLetter(artifact.contractName)}Abi`;
-  // Check if the abi file with the given name Smart Contract exists
-  const pathToFile = path.join(pathToDir, `${name}.ts`);
-
-  // Remove file if exists
+async function removeFileIfExists(pathToFile: string) {
   if (await fileExists(pathToFile)) {
     try {
       await fs.promises.rm(pathToFile);
@@ -55,8 +46,18 @@ const saveAbi = async (smartContractName: string) => {
       console.error(err);
     }
   }
+}
 
-  // Create new file and save new abi
+const pathToDir = path.join(__dirname, "../../", `frontend/src/abis`);
+
+const saveAbi = async (smartContractName: string) => {
+  const artifact = await artifacts.readArtifact(smartContractName)
+  const name = `${lowercaseFirstLetter(artifact.contractName)}Abi`;
+  const pathToFile = path.join(pathToDir, `${name}.ts`);
+
+  await createDirIfNotExist(pathToDir)
+  await removeFileIfExists(pathToFile);
+
   await fs.promises.writeFile(
     pathToFile,
     `export const ${name} = ${JSON.stringify(artifact.abi)} as const;`
@@ -66,9 +67,12 @@ const saveAbi = async (smartContractName: string) => {
 async function updateContractAddresses() {
   const raffle = await ethers.getContract("Raffle");
   const raffleToken = await ethers.getContract("RaffleToken");
-  const contractAddresses = JSON.parse(
-    fs.readFileSync(frontEndContractsFile, "utf8")
-  );
+
+  const pathToFile = `${pathToDir}/contractAddresses.ts`;
+  await removeFileIfExists(pathToFile);
+
+  const contractAddresses = {};
+
   if (network.config.chainId.toString() in contractAddresses) {
     if (
       !contractAddresses[network.config.chainId.toString()].includes(
@@ -92,6 +96,12 @@ async function updateContractAddresses() {
       raffleToken.address,
     ];
   }
-  fs.writeFileSync(frontEndContractsFile, JSON.stringify(contractAddresses));
+
+  await fs.promises.writeFile(
+    pathToFile,
+    `export const contractAddresses = ${JSON.stringify(
+      contractAddresses
+    )} as const;`
+  );
 }
 module.exports.tags = ["all", "frontend"];

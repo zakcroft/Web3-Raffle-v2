@@ -52,11 +52,8 @@ const networkConfig: NetworkConfigType = {
 };
 
 const developmentChains: string[] = ["hardhat", "localhost"];
-const frontEndContractsFile =
-  "../frontend/src/constants/contractAddresses.json";
 
 export {
   networkConfig,
-  developmentChains,
-  frontEndContractsFile
+  developmentChains
 };

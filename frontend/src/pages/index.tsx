@@ -5,8 +5,6 @@ import { Inter } from 'next/font/google';
 
 import { Button } from '@/common/Button';
 
-
-
 import { ConnectKitButton } from 'connectkit';
 // import { fetchBalance, getAccount } from '@wagmi/core';
 import {
@@ -16,6 +14,7 @@ import {
   // useContractReads,
   usePrepareContractWrite,
   useContractWrite,
+  Address,
   // useContract,
   // Address,
 } from 'wagmi';
@@ -23,24 +22,26 @@ import {
 import { useRaffle } from '@/hooks/useRaffle';
 
 import { Left, Main } from '@/common/Layouts';
-import {getAccountBalance} from "@/utils";
+import { getAccountBalance } from '@/utils';
 // import { GetServerSideProps } from 'next';
-// import { getTokenAllowanceOperation } from '@moralisweb3/common-evm-utils';
+// import { getTokenAllowanceOperation } from '@moralisweb3/common-evm-utils';0n
 
 const inter = Inter({ subsets: ['latin'] });
 
 export default function App() {
-  //const [raffleTokenAddressBalance, setUpdateCounter] = useState(0);
-  const [fetchedAccountBalance, setFetchedAccountBalance] = useState<bigint>(0n);
+  const [raffleTokenAddressBalance, setRaffleTokenAddressBalance] =
+    useState<bigint>(0n);
+  const [fetchedAccountBalance, setFetchedAccountBalance] =
+    useState<bigint>(0n);
 
   const { raffleAbi, raffleAddress, raffleTokenAbi, raffleTokenAddress } =
     useRaffle();
 
-  const { address } = useAccount()
+  const { address } = useAccount();
 
   const accountBalance = useBalance({
     address,
-  })
+  });
 
   const raffleBalance = useBalance({
     address: raffleAddress,
@@ -49,7 +50,19 @@ export default function App() {
   const raffleTokenBalance = useBalance({
     address: address,
     token: raffleTokenAddress,
+    enabled: false,
   });
+
+  useEffect(() => {
+    (async () => {
+      if (raffleTokenAddress) {
+        await raffleTokenBalance.refetch().then(({ data }) => {
+          const val = getAccountBalance(accountBalance);
+          setRaffleTokenAddressBalance(val);
+        });
+      }
+    })();
+  }, [accountBalance, raffleTokenAddress, raffleTokenBalance]);
 
   const tokenCost = parseUnits('0.1', 18);
 
@@ -68,10 +81,12 @@ export default function App() {
   //console.log('accountBalance ===', accountBalance);
   // console.log(typeof tokenCost);
   // console.log(tokenCost);
-  // console.log(isSuccess);
+  //  console.log('raffleBalance', raffleBalance);
+  //console.log('raffleTokenBalance', raffleTokenBalance.refetch);
 
   useEffect(() => {
     if (isSuccess) {
+      console.log(isSuccess);
       raffleTokenBalance.refetch().then((data) => {
         console.log('refetch raffleTokenBalance', data);
       });
@@ -83,10 +98,12 @@ export default function App() {
 
   useEffect(() => {
     if (accountBalance.data?.value) {
-      const val = getAccountBalance(accountBalance)
+      const val = getAccountBalance(accountBalance);
       setFetchedAccountBalance(val);
     }
   }, [accountBalance]);
+
+  console.log(raffleTokenAddressBalance.toString())
 
   return (
     <>
@@ -126,7 +143,7 @@ export default function App() {
           >
             Buy Raffle Tokens
           </Button>
-          <p>STASH: {raffleTokenBalance.data?.value.toString()}</p>
+          <p>STASH: {formatUnits(raffleTokenAddressBalance, 18)}</p>
           {/*<h3>Native Balance: {nativeBalance?.balance.ether} ETH</h3>*/}
         </Left>
       </Main>

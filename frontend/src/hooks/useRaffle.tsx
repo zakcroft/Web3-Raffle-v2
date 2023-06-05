@@ -9,9 +9,7 @@ import { raffleAbi, raffleTokenAbi, contractAddresses } from '../abis';
 
 export const useRaffle = () => {
   const [raffleAddress, setRaffleAddress] = useState<Address>(`0x` as Address);
-  const [raffleTokenAddress, setRaffleTokenAddress] = useState<Address>(
-    `0x` as Address,
-  );
+  const [raffleTokenAddress, setRaffleTokenAddress] = useState<Address>();
   const { chain } = useNetwork();
   const addresses: contractAddressesInterface = contractAddresses;
 
