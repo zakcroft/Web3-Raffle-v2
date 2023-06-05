@@ -31,6 +31,7 @@ const inter = Inter({ subsets: ['latin'] });
 export default function App() {
   const [raffleTokenAddressBalance, setRaffleTokenAddressBalance] =
     useState<bigint>(0n);
+  const [raffleAddressBalance, setRaffleAddressBalance] = useState<bigint>(0n);
   const [fetchedAccountBalance, setFetchedAccountBalance] =
     useState<bigint>(0n);
 
@@ -61,8 +62,21 @@ export default function App() {
         const val = getAccountBalance(balance);
         setRaffleTokenAddressBalance(val);
       }
+      if (raffleAddress) {
+        const balance = await raffleBalance.refetch();
+        const val = getAccountBalance(balance);
+        setRaffleAddressBalance(val);
+        console.log(raffleAddressBalance);
+      }
     })();
-  }, [accountBalance, raffleTokenAddress, raffleTokenBalance]);
+  }, [
+    accountBalance,
+    raffleAddress,
+    raffleAddressBalance,
+    raffleBalance,
+    raffleTokenAddress,
+    raffleTokenBalance,
+  ]);
 
   const tokenCost = parseUnits('0.1', 18);
 
