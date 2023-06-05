@@ -45,6 +45,7 @@ export default function App() {
 
   const raffleBalance = useBalance({
     address: raffleAddress,
+    enabled: false,
   });
 
   const raffleTokenBalance = useBalance({
@@ -56,10 +57,9 @@ export default function App() {
   useEffect(() => {
     (async () => {
       if (raffleTokenAddress) {
-        await raffleTokenBalance.refetch().then(({ data }) => {
-          const val = getAccountBalance(accountBalance);
-          setRaffleTokenAddressBalance(val);
-        });
+        const balance = await raffleTokenBalance.refetch();
+        const val = getAccountBalance(balance);
+        setRaffleTokenAddressBalance(val);
       }
     })();
   }, [accountBalance, raffleTokenAddress, raffleTokenBalance]);
@@ -103,7 +103,7 @@ export default function App() {
     }
   }, [accountBalance]);
 
-  console.log(raffleTokenAddressBalance.toString())
+  console.log(raffleTokenAddressBalance.toString());
 
   return (
     <>
