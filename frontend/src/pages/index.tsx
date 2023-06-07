@@ -112,7 +112,6 @@ export default function App() {
           <h3 className={'text-sm text-gray-500 italic'}>
             Address : {raffleAddress}
           </h3>
-
           <h1
             className={
               'inline-block text-3xl font-black text-white lg:leading-[5.625rem] '
@@ -135,10 +134,10 @@ export default function App() {
       </header>
 
       <Main>
-        <Left title={'Info'}>
+        <Left title={'Your info'}>
           <p>
             You have entered{' '}
-            <span className={'text-2xl '}>
+            <span className={'text-2xl text-red-500'}>
               {formatUnits(raffleTokenUserAddressBalance, 0)}
             </span>{' '}
             Tokens into the next draw
