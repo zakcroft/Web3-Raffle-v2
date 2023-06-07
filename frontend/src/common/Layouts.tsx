@@ -1,7 +1,9 @@
 import { ReactNode } from 'react';
 
 export const Main = ({ children }: { children: ReactNode }) => {
-  return <div className={'flex grow flex-col lg:flex-row'}>{children}</div>;
+  return (
+    <main className={'flex grow flex-col lg:flex-row h-full'}>{children}</main>
+  );
 };
 
 export const Left = ({
@@ -12,32 +14,43 @@ export const Left = ({
   children: ReactNode;
 }) => {
   return (
-    <div className={'flex flex-col basis-3/12 pt-2 pb-8 px-8 gap-2'}>
+    <div
+      className={
+        'flex flex-col basis-3/12 pt-2 pb-8 px-8 gap-6 border-r border-gray-500'
+      }
+    >
       <h1
         className={
-          'inline-block text-3xl lg:text-6xl font-black text-white lg:leading-[5.625rem] '
+          'inline-block text-3xl  font-black text-white lg:leading-[5.625rem] border-b border-solid border-gray-500 italic'
         }
       >
         {title}
       </h1>
-      {/*<p*/}
-      {/*  className={*/}
-      {/*    "inline-block text-normal lg:text-xl font-normal text-white lg:mt-4 lg:leading-[2rem]"*/}
-      {/*  }*/}
-      {/*>*/}
       {children}
-      {/*</p>*/}
     </div>
   );
 };
 
-export const Right = ({ children }: { children: ReactNode }) => {
+export const Right = ({
+  title,
+  children,
+}: {
+  title: string;
+  children: ReactNode;
+}) => {
   return (
     <div
       className={
-        'flex flex-col basis-5/12 border-l divide-y divide-gray-700 border-gray-700 lg:max-h-[621px]'
+        'flex flex-col basis-2/12 pt-2 pb-8 px-8 gap-2 border-l border-gray-500'
       }
     >
+      <h1
+        className={
+          'inline-block text-3xl italic font-black text-white lg:leading-[5.625rem] border-b border-solid border-gray-500'
+        }
+      >
+        {title}
+      </h1>
       {children}
     </div>
   );

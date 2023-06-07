@@ -21,7 +21,7 @@ import {
 
 import { useRaffle } from '@/hooks/useRaffle';
 
-import { Left, Main } from '@/common/Layouts';
+import { Left, Main, Right } from '@/common/Layouts';
 import { getAccountBalance } from '@/utils';
 // import { GetServerSideProps } from 'next';
 // import { getTokenAllowanceOperation } from '@moralisweb3/common-evm-utils';0n
@@ -29,9 +29,9 @@ import { getAccountBalance } from '@/utils';
 const inter = Inter({ subsets: ['latin'] });
 
 export default function App() {
-  const [raffleTokenAddressBalance, setRaffleTokenAddressBalance] =
-    useState<bigint>(0n);
   const [raffleAddressBalance, setRaffleAddressBalance] = useState<bigint>(0n);
+  const [raffleTokenUserAddressBalance, setRaffleTokenUserAddressBalance] =
+    useState<bigint>(0n);
   const [fetchedAccountBalance, setFetchedAccountBalance] =
     useState<bigint>(0n);
 
@@ -40,7 +40,7 @@ export default function App() {
 
   const { address } = useAccount();
 
-  const accountBalance = useBalance({
+  const userAccountBalance = useBalance({
     address,
   });
 
@@ -49,34 +49,11 @@ export default function App() {
     enabled: false,
   });
 
-  const raffleTokenBalance = useBalance({
+  const raffleTokenUserBalance = useBalance({
     address: address,
     token: raffleTokenAddress,
     enabled: false,
   });
-
-  useEffect(() => {
-    (async () => {
-      if (raffleTokenAddress) {
-        const balance = await raffleTokenBalance.refetch();
-        const val = getAccountBalance(balance);
-        setRaffleTokenAddressBalance(val);
-      }
-      if (raffleAddress) {
-        const balance = await raffleBalance.refetch();
-        const val = getAccountBalance(balance);
-        setRaffleAddressBalance(val);
-        console.log(raffleAddressBalance);
-      }
-    })();
-  }, [
-    accountBalance,
-    raffleAddress,
-    raffleAddressBalance,
-    raffleBalance,
-    raffleTokenAddress,
-    raffleTokenBalance,
-  ]);
 
   const tokenCost = parseUnits('0.1', 18);
 
@@ -88,47 +65,63 @@ export default function App() {
     value: tokenCost,
   });
 
-  const { isSuccess, write } = useContractWrite(config);
-
-  // console.log('fetchedAccountBalance ===', fetchedAccountBalance);
-  // console.log('address ===', address);
-  //console.log('accountBalance ===', accountBalance);
-  // console.log(typeof tokenCost);
-  // console.log(tokenCost);
-  //  console.log('raffleBalance', raffleBalance);
-  //console.log('raffleTokenBalance', raffleTokenBalance.refetch);
+  const { isSuccess: buyRaffleTokensSuccess, write } = useContractWrite(config);
 
   useEffect(() => {
-    if (isSuccess) {
-      console.log(isSuccess);
-      raffleTokenBalance.refetch().then((data) => {
-        console.log('refetch raffleTokenBalance', data);
-      });
-      accountBalance.refetch().then((data) => {
-        console.log('refetch accountBalance', data);
-      });
-    }
-  }, [accountBalance, isSuccess, raffleTokenBalance]);
-
-  useEffect(() => {
-    if (accountBalance.data?.value) {
-      const val = getAccountBalance(accountBalance);
-      setFetchedAccountBalance(val);
-    }
-  }, [accountBalance]);
-
-  console.log(raffleTokenAddressBalance.toString());
+    (async () => {
+      if (raffleTokenAddress || buyRaffleTokensSuccess) {
+        const balance = await raffleTokenUserBalance.refetch();
+        const val = getAccountBalance(balance);
+        setRaffleTokenUserAddressBalance(val);
+      }
+      if (raffleAddress || buyRaffleTokensSuccess) {
+        const balance = await raffleBalance.refetch();
+        const val = getAccountBalance(balance);
+        setRaffleAddressBalance(val);
+      }
+      if (address || buyRaffleTokensSuccess) {
+        const balance = await userAccountBalance.refetch();
+        const val = getAccountBalance(balance);
+        setFetchedAccountBalance(val);
+      }
+    })();
+  }, [
+    address,
+    buyRaffleTokensSuccess,
+    raffleAddress,
+    raffleBalance,
+    raffleTokenAddress,
+    raffleTokenUserBalance,
+    userAccountBalance,
+  ]);
 
   return (
     <>
-      <header className={'grid grid-cols-3 pt-8 px-12 pb-2'}>
+      <header
+        className={'grid grid-cols-3 pt-8 px-12 pb-2 border-b border-gray-500'}
+      >
+        <Button
+          classOverrides={'w-2/3 h-fit self-center'}
+          disabled={!write}
+          onClick={() => write?.()}
+        >
+          Buy Raffle Token <span className={'italic'}>(0.1 eth)</span>
+        </Button>
         <div className={'flex flex-col items-center col-start-2'}>
           <h3 className={'text-2xl font-black'}>DECENTRALIZED RAFFLE</h3>
           <h3 className={'text-sm text-gray-500 italic'}>
             Address : {raffleAddress}
           </h3>
+
+          <h1
+            className={
+              'inline-block text-3xl font-black text-white lg:leading-[5.625rem] '
+            }
+          >
+            Jackpot: {formatUnits(raffleAddressBalance, 18)} ETH
+          </h1>
         </div>
-        <div className={'justify-self-end'}>
+        <div className={'justify-self-end flex flex-col'}>
           <ConnectKitButton />
           <h1
             className={
@@ -141,25 +134,41 @@ export default function App() {
         </div>
       </header>
 
-      {/*<h1*/}
-      {/*  className={*/}
-      {/*    'inline-block text-3xl font-black text-white lg:leading-[5.625rem] '*/}
-      {/*  }*/}
-      {/*>*/}
-      {/*  Winnings: {raffleTokenBalance.data?.value.toString()}*/}
-      {/*</h1>*/}
       <Main>
-        <Left title={'Stash'}>
-          <Button
-            classOverrides={'w-2/3'}
-            disabled={!write}
-            onClick={() => write?.()}
-          >
-            Buy Raffle Tokens
-          </Button>
-          <p>STASH: {formatUnits(raffleTokenAddressBalance, 18)}</p>
-          {/*<h3>Native Balance: {nativeBalance?.balance.ether} ETH</h3>*/}
+        <Left title={'Info'}>
+          <p>
+            You have entered{' '}
+            <span className={'text-2xl '}>
+              {formatUnits(raffleTokenUserAddressBalance, 0)}
+            </span>{' '}
+            Tokens into the next draw
+          </p>
+          <p className={'inline-block text-xl font-black text-white  mt-20 '}>
+            Your Winning history{' '}
+          </p>
+          <ul className={'text-sm  text-gray-500 italic'}>
+            <li>New Date.</li>
+            <li>New Date.</li>
+          </ul>
         </Left>
+        <div className={'flex flex-col basis-7/12 items-center pt-20'}>
+          Welcome to the Decentralized Raffle. This is a decentralized raffle
+          Countdown to draw.
+        </div>
+        <Right title={'Stats'}>
+          <p
+            className={
+              'inline-block text-xl font-black text-white pt-8 border-b border-dashed border-gray-500'
+            }
+          >
+            Winner history{' '}
+          </p>
+          <ul className={'text-sm text-gray-500 italic'}>
+            <li>0x1234567890</li>
+            <li>0x1234567890</li>
+            <li>0x1234567890</li>
+          </ul>
+        </Right>
       </Main>
     </>
   );

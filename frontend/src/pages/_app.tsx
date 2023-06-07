@@ -42,12 +42,6 @@ export default function App({ Component, ...rest }: AppProps) {
           <Provider store={store}>
             <Head>
               <title>Decentralized Raffle</title>
-              <meta name="description" content="Decentralized Raffle" />
-              <meta
-                name="viewport"
-                content="width=device-width, initial-scale=1"
-              />
-              <link rel="icon" href="/favicon.ico" />
             </Head>
             <Component {...pageProps} />
           </Provider>

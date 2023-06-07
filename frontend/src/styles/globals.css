@@ -1,6 +1,15 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+@layer components {
+  #__next {
+    height: calc(100% - 183px);
+  }
+  html,
+  body {
+    @apply h-full;
+  }
+}
 
 :root {
   --max-width: 1100px;

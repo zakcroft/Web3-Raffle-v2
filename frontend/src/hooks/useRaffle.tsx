@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNetwork, Address } from 'wagmi';
 
 interface contractAddressesInterface {
-  [key: number]: ReadonlyArray<string>;
+  readonly [key: number]: ReadonlyArray<string>;
 }
 
 import { raffleAbi, raffleTokenAbi, contractAddresses } from '@/abis';
