@@ -29,9 +29,9 @@ module.exports = {
     hardhat: {
       chainId: 31337,
     },
-    localhost: {
-      chainId: 1337,
-    },
+    // localhost: {
+    //   chainId: 1337,
+    // },
     seploia: {
       url: process.env.SEPOLIA_URL_INFURA,
       accounts: [process.env.DEV_1_PRIVATE_KEY],

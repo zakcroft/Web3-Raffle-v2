@@ -1,5 +1,5 @@
 const { expect } = require("chai");
-
+const {  ethers } = require("hardhat");
 describe("Raffle Contract", function () {
   let RaffleContract, raffleContract, Token, token, owner, addr1, addr2, addr3;
 

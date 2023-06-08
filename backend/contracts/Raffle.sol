@@ -19,7 +19,7 @@ import './Events.sol';
 import './RaffleNFT.sol';
 import './RaffleToken.sol';
 
-error Raffle__TransferFailed();
+    error Raffle__TransferFailed();
 
 // buy tokens
 error Raffle__SendMoreToEnterRaffle();
@@ -121,10 +121,12 @@ contract Raffle is
     }
 
     function setPlayer(address addr, uint256 amount) private raffleIsOpen {
-        getPlayers().set(addr, amount);
+        console.log("SET PLAYER", addr, amount);
+        getPlayers().set( addr, amount);
     }
 
     function updatePlayer(address addr, uint256 amount) private raffleIsOpen {
+        console.log("UPDATE PLAYER", addr, amount);
         uint256 totalEntered = getPlayers().get(addr);
         getPlayers().set(addr, totalEntered.add(amount));
     }
@@ -238,6 +240,14 @@ contract Raffle is
     // TODO calldata or memory?
     function pickWinner(uint256[] memory randomWords) public returns (uint256) {
         //calculating
+        console.log('first',
+            randomWords[0],
+            getNumberOfPlayers()
+        );
+
+        console.log('randomWords[0] % getNumberOfPlayers()',
+            randomWords[0] % getNumberOfPlayers()
+        );
         uint256 indexOfWinner = randomWords[0] % getNumberOfPlayers();
         uint256 nftIndexToMint = randomWords[0] %
             raffleNFT.getTokenUrisLength();
@@ -365,6 +375,7 @@ contract Raffle is
 
     function getNumberOfPlayers() public view returns (uint256) {
         EnumerableMap.AddressToUintMap storage players = getPlayers();
+        console.log(players.length());
         return players.length();
     }
 

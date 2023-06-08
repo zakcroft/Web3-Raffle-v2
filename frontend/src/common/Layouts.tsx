@@ -8,9 +8,11 @@ export const Main = ({ children }: { children: ReactNode }) => {
 
 export const Left = ({
   title,
+  description,
   children,
 }: {
   title: string;
+  description: string;
   children: ReactNode;
 }) => {
   return (
@@ -21,10 +23,13 @@ export const Left = ({
     >
       <h1
         className={
-          'inline-block text-3xl  font-black text-white lg:leading-[5.625rem] border-b border-solid border-gray-500 italic'
+          'inline-block text-3xl font-black text-white lg:leading-[3.625rem] border-b border-solid border-gray-500 italic'
         }
       >
         {title}
+        <p className={'italic text-sm font-light text-gray-200 my-6'}>
+          {description}
+        </p>
       </h1>
       {children}
     </div>

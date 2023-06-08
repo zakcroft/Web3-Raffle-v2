@@ -38,6 +38,7 @@ export async function logStats(msg?: string, run = true) {
   console.log("=== Base Stats ===");
   console.log("Game ID", (await raffle.getGameID()).toString());
   console.log("Raffle state", (await raffle.getRaffleState()).toString());
+  console.log("Number of players", (await raffle.getNumberOfPlayers()).toString());
   console.log(
     "Token Cost ETH",
     format((await raffle.getTokenCost()).toString())

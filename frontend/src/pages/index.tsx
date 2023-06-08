@@ -57,7 +57,9 @@ export default function App() {
 
   const tokenCost = parseUnits('0.1', 18);
 
-  const { config } = usePrepareContractWrite({
+
+
+  const { config: configBuyRaffleTokens } = usePrepareContractWrite({
     address: raffleAddress,
     abi: raffleAbi,
     functionName: 'buyRaffleTokens',
@@ -65,7 +67,42 @@ export default function App() {
     value: tokenCost,
   });
 
-  const { isSuccess: buyRaffleTokensSuccess, write } = useContractWrite(config);
+
+
+  const { isSuccess: buyRaffleTokensSuccess, write: writeBuyRaffleTokens } =
+    useContractWrite(configBuyRaffleTokens);
+
+
+
+  const { config: configEnterRaffle } = usePrepareContractWrite({
+    address: raffleAddress,
+    abi: raffleAbi,
+    functionName: 'enterRaffle',
+    account: address,
+    args: [1n],
+    gas: 1_000_000n,
+  });
+
+  console.log(configEnterRaffle);
+
+  const { isSuccess: enterRaffleSuccess,data,  write: writeEnterRaffle } =
+      useContractWrite(configEnterRaffle);
+
+
+
+  console.log(writeEnterRaffle);
+
+
+  // const { config: configPickAWinner } = usePrepareContractWrite({
+  //   address: raffleAddress,
+  //   abi: raffleAbi,
+  //   functionName: 'pickWinner',
+  //   account: address,
+  //   args: [[20n]],
+  // });
+  //
+  // const { isSuccess: pickAWinnerSuccess, write: writePickWinner } =
+  //   useContractWrite(configPickAWinner);
 
   useEffect(() => {
     (async () => {
@@ -100,13 +137,6 @@ export default function App() {
       <header
         className={'grid grid-cols-3 pt-8 px-12 pb-2 border-b border-gray-500'}
       >
-        <Button
-          classOverrides={'w-2/3 h-fit self-center'}
-          disabled={!write}
-          onClick={() => write?.()}
-        >
-          Buy Raffle Token <span className={'italic'}>(0.1 eth)</span>
-        </Button>
         <div className={'flex flex-col items-center col-start-2'}>
           <h3 className={'text-2xl font-black'}>DECENTRALIZED RAFFLE</h3>
           <h3 className={'text-sm text-gray-500 italic'}>
@@ -134,14 +164,25 @@ export default function App() {
       </header>
 
       <Main>
-        <Left title={'Your info'}>
+        <Left
+          title={'Reserve'}
+          description={'Buy tokens to top up your reserve.'}
+        >
+          <Button
+            disabled={!writeBuyRaffleTokens}
+            onClick={() => writeBuyRaffleTokens?.()}
+          >
+            Buy Raffle Token <span className={'italic'}>(0.1 eth)</span>
+          </Button>
           <p>
-            You have entered{' '}
+            You have{' '}
             <span className={'text-2xl text-red-500'}>
               {formatUnits(raffleTokenUserAddressBalance, 0)}
             </span>{' '}
-            Tokens into the next draw
+            tokens in your reserve.
           </p>
+          <p>These are not entered into the draw yet.</p>
+          <p>Enter tokens in the play area.</p>
           <p className={'inline-block text-xl font-black text-white  mt-20 '}>
             Your Winning history{' '}
           </p>
@@ -154,6 +195,19 @@ export default function App() {
           Welcome to the Decentralized Raffle. This is a decentralized raffle
           Countdown to draw.
         </div>
+        <Button
+            disabled={!writeEnterRaffle}
+            onClick={() => writeEnterRaffle?.()}
+        >
+          Enter <span className={'italic'}>1</span> token into the Raffle
+        </Button>
+        {/*<Button*/}
+        {/*  classOverrides={'w-2/3 h-fit self-center'}*/}
+        {/*  disabled={!writePickWinner}*/}
+        {/*  onClick={() => writePickWinner?.()}*/}
+        {/*>*/}
+        {/*  Pick a winner*/}
+        {/*</Button>*/}
         <Right title={'Stats'}>
           <p
             className={
