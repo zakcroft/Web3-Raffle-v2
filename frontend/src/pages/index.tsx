@@ -23,6 +23,7 @@ import { useRaffle } from '@/hooks/useRaffle';
 
 import { Left, Main, Right } from '@/common/Layouts';
 import { getAccountBalance } from '@/utils';
+import {useBuyTokens} from "@/hooks/useBuyTokens";
 // import { GetServerSideProps } from 'next';
 // import { getTokenAllowanceOperation } from '@moralisweb3/common-evm-utils';0n
 
@@ -54,44 +55,43 @@ export default function App() {
     token: raffleTokenAddress,
     enabled: false,
   });
+  
+  const { isSuccess: buyRaffleTokensSuccess, write: writeBuyRaffleTokens } = useBuyTokens();
 
-  const tokenCost = parseUnits('0.1', 18);
-
-
-
-  const { config: configBuyRaffleTokens } = usePrepareContractWrite({
-    address: raffleAddress,
-    abi: raffleAbi,
-    functionName: 'buyRaffleTokens',
+  const { config: configApprove } = usePrepareContractWrite({
+    address: raffleTokenAddress,
+    abi: raffleTokenAbi,
+    functionName: 'increaseAllowance',
     account: address,
-    value: tokenCost,
+    args: ['0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9', 1n],
+    gas: 1000000n,
   });
 
+  //console.log(configApprove);
+
+  const {
+    isSuccess: approveSuccess,
+    write: writeApprove,
+  } = useContractWrite(configApprove);
 
 
-  const { isSuccess: buyRaffleTokensSuccess, write: writeBuyRaffleTokens } =
-    useContractWrite(configBuyRaffleTokens);
-
-
-
-  const { config: configEnterRaffle } = usePrepareContractWrite({
+  const { config: configEnterRaffle, data,refetchPrepareConfigEnterRaffle } = usePrepareContractWrite({
     address: raffleAddress,
     abi: raffleAbi,
     functionName: 'enterRaffle',
     account: address,
     args: [1n],
-    gas: 1_000_000n,
+    enabled: false,
   });
 
-  console.log(configEnterRaffle);
+  console.log('configEnterRaffle==', configEnterRaffle);
 
-  const { isSuccess: enterRaffleSuccess,data,  write: writeEnterRaffle } =
-      useContractWrite(configEnterRaffle);
+  const {
+    isSuccess: enterRaffleSuccess,
+    write: writeEnterRaffle,
+  } = useContractWrite(configEnterRaffle);
 
-
-
-  console.log(writeEnterRaffle);
-
+  console.log('writeEnterRaffle==', writeEnterRaffle);
 
   // const { config: configPickAWinner } = usePrepareContractWrite({
   //   address: raffleAddress,
@@ -170,9 +170,21 @@ export default function App() {
         >
           <Button
             disabled={!writeBuyRaffleTokens}
-            onClick={() => writeBuyRaffleTokens?.()}
+            onClick={async () => {
+                await writeBuyRaffleTokens?.()
+                // await writeApprove?.()
+          }}
           >
             Buy Raffle Token <span className={'italic'}>(0.1 eth)</span>
+          </Button>
+          <Button
+              disabled={!writeBuyRaffleTokens}
+              onClick={async () => {
+                await writeApprove?.()
+                await  refetchPrepareConfigEnterRaffle?.()
+              }}
+          >
+              Approve Raffle Token <span className={'italic'}>(0.1 eth)</span>
           </Button>
           <p>
             You have{' '}
@@ -191,16 +203,22 @@ export default function App() {
             <li>New Date.</li>
           </ul>
         </Left>
-        <div className={'flex flex-col basis-7/12 items-center pt-20'}>
-          Welcome to the Decentralized Raffle. This is a decentralized raffle
-          Countdown to draw.
-        </div>
-        <Button
+        <div className={'flex flex-col basis-7/12 items-center p-20'}>
+          Welcome to the Decentralized Raffle play area.
+          <p> Countdown to draw.</p>
+          <Button
+            classOverrides={'self-start'}
             disabled={!writeEnterRaffle}
-            onClick={() => writeEnterRaffle?.()}
-        >
-          Enter <span className={'italic'}>1</span> token into the Raffle
-        </Button>
+            onClick={() => {
+
+
+              writeEnterRaffle?.()
+            }}
+          >
+            Enter <span className={'italic'}>1</span> token into the Raffle
+          </Button>
+        </div>
+
         {/*<Button*/}
         {/*  classOverrides={'w-2/3 h-fit self-center'}*/}
         {/*  disabled={!writePickWinner}*/}

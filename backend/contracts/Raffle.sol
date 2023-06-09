@@ -26,6 +26,9 @@ error Raffle__SendMoreToEnterRaffle();
 error Raffle__CannotBuyPartialTokens();
 error Raffle__RaffleDoesNotHaveEnoughTokens();
 
+//approve
+error Raffle__ApproveFailed();
+
 // enter
 error Raffle__YouNeedToBuyMoreTokens();
 error Raffle__YouNeedToApproveRaffleTokens();
@@ -202,8 +205,10 @@ contract Raffle is
         uint256 raffleTokensAmountToEnter
     ) external raffleIsOpen {
         // sent enough tokens to enter
+        console.log('raffleTokensAmountToEnter===', raffleTokensAmountToEnter);
         if (raffleTokensAmountToEnter < 1) {
-            revert Raffle__MinimumOneTokenToEnter();
+            console.log('Raffle__MinimumOneTokenToEnter');
+        revert Raffle__MinimumOneTokenToEnter();
         }
 
         // Check have bought some tokens
@@ -214,10 +219,12 @@ contract Raffle is
 
         // Check have approved the raffle contract to use there tokens
         uint256 allowance = token.allowance(msg.sender, address(this));
-        if (allowance <= 0) {
+        if (allowance < raffleTokensAmountToEnter) {
+            console.log('allowance <= 0===', allowance <= 0);
             revert Raffle__YouNeedToApproveRaffleTokens();
         }
 
+        console.log('transfer?');
         // Enter raffle
         token.transferFrom(
             msg.sender,
