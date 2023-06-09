@@ -23,7 +23,10 @@ import { useRaffle } from '@/hooks/useRaffle';
 
 import { Left, Main, Right } from '@/common/Layouts';
 import { getAccountBalance } from '@/utils';
-import {useBuyTokens} from "@/hooks/useBuyTokens";
+import { useBuyTokens } from '@/hooks/useBuyTokens';
+import { useApproveTokens } from '@/hooks/useApproveTokens';
+import { useEnterRaffle } from '@/hooks/useEnterRaffle';
+import { usePickWinner } from '@/hooks/usePickWinner';
 // import { GetServerSideProps } from 'next';
 // import { getTokenAllowanceOperation } from '@moralisweb3/common-evm-utils';0n
 
@@ -55,54 +58,13 @@ export default function App() {
     token: raffleTokenAddress,
     enabled: false,
   });
-  
-  const { isSuccess: buyRaffleTokensSuccess, write: writeBuyRaffleTokens } = useBuyTokens();
 
-  const { config: configApprove } = usePrepareContractWrite({
-    address: raffleTokenAddress,
-    abi: raffleTokenAbi,
-    functionName: 'increaseAllowance',
-    account: address,
-    args: ['0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9', 1n],
-    gas: 1000000n,
-  });
-
-  //console.log(configApprove);
-
-  const {
-    isSuccess: approveSuccess,
-    write: writeApprove,
-  } = useContractWrite(configApprove);
-
-
-  const { config: configEnterRaffle, data,refetchPrepareConfigEnterRaffle } = usePrepareContractWrite({
-    address: raffleAddress,
-    abi: raffleAbi,
-    functionName: 'enterRaffle',
-    account: address,
-    args: [1n],
-    enabled: false,
-  });
-
-  console.log('configEnterRaffle==', configEnterRaffle);
-
-  const {
-    isSuccess: enterRaffleSuccess,
-    write: writeEnterRaffle,
-  } = useContractWrite(configEnterRaffle);
-
-  console.log('writeEnterRaffle==', writeEnterRaffle);
-
-  // const { config: configPickAWinner } = usePrepareContractWrite({
-  //   address: raffleAddress,
-  //   abi: raffleAbi,
-  //   functionName: 'pickWinner',
-  //   account: address,
-  //   args: [[20n]],
-  // });
-  //
-  // const { isSuccess: pickAWinnerSuccess, write: writePickWinner } =
-  //   useContractWrite(configPickAWinner);
+  const { buyRaffleTokensSuccess, buyRaffleTokens } = useBuyTokens();
+  const { approveTokensSuccess, approveTokens } = useApproveTokens();
+  const { enterRaffleSuccess, enterRaffle, refetchPrepareConfigEnterRaffle } =
+    useEnterRaffle();
+  const { pickAWinnerSuccess, pickWinner, refetchPrepareConfigPickWinner } =
+    usePickWinner();
 
   useEffect(() => {
     (async () => {
@@ -169,22 +131,22 @@ export default function App() {
           description={'Buy tokens to top up your reserve.'}
         >
           <Button
-            disabled={!writeBuyRaffleTokens}
+            disabled={!buyRaffleTokens}
             onClick={async () => {
-                await writeBuyRaffleTokens?.()
-                // await writeApprove?.()
-          }}
+              await buyRaffleTokens()?.();
+              // await writeApprove?.()
+            }}
           >
             Buy Raffle Token <span className={'italic'}>(0.1 eth)</span>
           </Button>
           <Button
-              disabled={!writeBuyRaffleTokens}
-              onClick={async () => {
-                await writeApprove?.()
-                await  refetchPrepareConfigEnterRaffle?.()
-              }}
+            disabled={!writeBuyRaffleTokens}
+            onClick={async () => {
+              await approveTokens?.();
+              await refetchPrepareConfigEnterRaffle?.();
+            }}
           >
-              Approve Raffle Token <span className={'italic'}>(0.1 eth)</span>
+            Approve Raffle Token <span className={'italic'}>(0.1 eth)</span>
           </Button>
           <p>
             You have{' '}
@@ -210,9 +172,7 @@ export default function App() {
             classOverrides={'self-start'}
             disabled={!writeEnterRaffle}
             onClick={() => {
-
-
-              writeEnterRaffle?.()
+              writeEnterRaffle?.();
             }}
           >
             Enter <span className={'italic'}>1</span> token into the Raffle
