@@ -205,9 +205,8 @@ contract Raffle is
         uint256 raffleTokensAmountToEnter
     ) external raffleIsOpen {
         // sent enough tokens to enter
-        console.log('raffleTokensAmountToEnter===', raffleTokensAmountToEnter);
+
         if (raffleTokensAmountToEnter < 1) {
-            console.log('Raffle__MinimumOneTokenToEnter');
         revert Raffle__MinimumOneTokenToEnter();
         }
 
@@ -220,11 +219,9 @@ contract Raffle is
         // Check have approved the raffle contract to use there tokens
         uint256 allowance = token.allowance(msg.sender, address(this));
         if (allowance < raffleTokensAmountToEnter) {
-            console.log('allowance <= 0===', allowance <= 0);
             revert Raffle__YouNeedToApproveRaffleTokens();
         }
 
-        console.log('transfer?');
         // Enter raffle
         token.transferFrom(
             msg.sender,
@@ -247,14 +244,6 @@ contract Raffle is
     // TODO calldata or memory?
     function pickWinner(uint256[] memory randomWords) public returns (uint256) {
         //calculating
-        console.log('first',
-            randomWords[0],
-            getNumberOfPlayers()
-        );
-
-        console.log('randomWords[0] % getNumberOfPlayers()',
-            randomWords[0] % getNumberOfPlayers()
-        );
         uint256 indexOfWinner = randomWords[0] % getNumberOfPlayers();
         uint256 nftIndexToMint = randomWords[0] %
             raffleNFT.getTokenUrisLength();

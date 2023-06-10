@@ -2,16 +2,18 @@ import { useEffect, useState } from 'react';
 import { useNetwork, Address } from 'wagmi';
 
 interface contractAddressesInterface {
-  readonly [key: number]: ReadonlyArray<string>;
+  readonly [key: number]: ReadonlyArray<Address>;
 }
 
 import { raffleAbi, raffleTokenAbi, contractAddresses } from '@/abis';
 
 export const useRaffle = () => {
-  const [raffleAddress, setRaffleAddress] = useState<Address>();
-  const [raffleTokenAddress, setRaffleTokenAddress] = useState<Address>();
-  const { chain } = useNetwork();
   const addresses: contractAddressesInterface = contractAddresses;
+  const [deafultRaffleAddress, defaultRaffleTokenAddress] = addresses[31337]
+  const [raffleAddress, setRaffleAddress] = useState<Address>(deafultRaffleAddress);
+  const [raffleTokenAddress, setRaffleTokenAddress] = useState<Address>(defaultRaffleTokenAddress);
+  const { chain } = useNetwork();
+
 
   useEffect(() => {
     if (chain?.id) {

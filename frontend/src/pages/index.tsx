@@ -133,21 +133,20 @@ export default function App() {
           <Button
             disabled={!buyRaffleTokens}
             onClick={async () => {
-              await buyRaffleTokens()?.();
-              // await writeApprove?.()
+              await buyRaffleTokens?.();
             }}
           >
             Buy Raffle Token <span className={'italic'}>(0.1 eth)</span>
           </Button>
-          <Button
-            disabled={!writeBuyRaffleTokens}
-            onClick={async () => {
-              await approveTokens?.();
-              await refetchPrepareConfigEnterRaffle?.();
-            }}
-          >
-            Approve Raffle Token <span className={'italic'}>(0.1 eth)</span>
-          </Button>
+          {/*<Button*/}
+          {/*  disabled={!approveTokens}*/}
+          {/*  onClick={async () => {*/}
+          {/*    await approveTokens?.();*/}
+          {/*    //await refetchPrepareConfigEnterRaffle?.();*/}
+          {/*  }}*/}
+          {/*>*/}
+          {/*  Approve Raffle Token <span className={'italic'}>(0.1 eth)</span>*/}
+          {/*</Button>*/}
           <p>
             You have{' '}
             <span className={'text-2xl text-red-500'}>
@@ -170,22 +169,24 @@ export default function App() {
           <p> Countdown to draw.</p>
           <Button
             classOverrides={'self-start'}
-            disabled={!writeEnterRaffle}
-            onClick={() => {
-              writeEnterRaffle?.();
+            disabled={!approveTokens}
+            onClick={async () => {
+              await approveTokens?.();
+              // await refetchPrepareConfigEnterRaffle?.();
+              // enterRaffle?.();
             }}
           >
             Enter <span className={'italic'}>1</span> token into the Raffle
           </Button>
         </div>
 
-        {/*<Button*/}
-        {/*  classOverrides={'w-2/3 h-fit self-center'}*/}
-        {/*  disabled={!writePickWinner}*/}
-        {/*  onClick={() => writePickWinner?.()}*/}
-        {/*>*/}
-        {/*  Pick a winner*/}
-        {/*</Button>*/}
+        <Button
+          classOverrides={'w-2/3 h-fit self-center'}
+          disabled={!pickWinner}
+          onClick={() => pickWinner?.()}
+        >
+          Pick a winner
+        </Button>
         <Right title={'Stats'}>
           <p
             className={
