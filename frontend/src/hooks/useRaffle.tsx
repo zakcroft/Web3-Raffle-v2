@@ -9,11 +9,13 @@ import { raffleAbi, raffleTokenAbi, contractAddresses } from '@/abis';
 
 export const useRaffle = () => {
   const addresses: contractAddressesInterface = contractAddresses;
-  const [deafultRaffleAddress, defaultRaffleTokenAddress] = addresses[31337]
-  const [raffleAddress, setRaffleAddress] = useState<Address>(deafultRaffleAddress);
-  const [raffleTokenAddress, setRaffleTokenAddress] = useState<Address>(defaultRaffleTokenAddress);
+  const [deafultRaffleAddress, defaultRaffleTokenAddress] = addresses[31337];
+  const [raffleAddress, setRaffleAddress] =
+    useState<Address>(deafultRaffleAddress);
+  const [raffleTokenAddress, setRaffleTokenAddress] = useState<Address>(
+    defaultRaffleTokenAddress,
+  );
   const { chain } = useNetwork();
-
 
   useEffect(() => {
     if (chain?.id) {

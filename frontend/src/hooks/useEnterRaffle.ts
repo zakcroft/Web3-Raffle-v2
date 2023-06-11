@@ -6,10 +6,7 @@ export const useEnterRaffle = () => {
   const { address } = useAccount();
   const { raffleAbi, raffleAddress } = useRaffle();
 
-  const {
-    config: configEnterRaffle,
-    refetch: refetchPrepareConfigEnterRaffle,
-  } = usePrepareContractWrite({
+  const { config: configEnterRaffle } = usePrepareContractWrite({
     address: raffleAddress,
     abi: raffleAbi,
     functionName: 'enterRaffle',
@@ -21,5 +18,5 @@ export const useEnterRaffle = () => {
   const { isSuccess: enterRaffleSuccess, write: enterRaffle } =
     useContractWrite(configEnterRaffle);
 
-  return { enterRaffleSuccess, enterRaffle, refetchPrepareConfigEnterRaffle };
+  return { enterRaffleSuccess, enterRaffle };
 };

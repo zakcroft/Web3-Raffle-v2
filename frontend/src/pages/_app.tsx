@@ -15,7 +15,7 @@ import wrapper from '../store';
 import '@/styles/globals.css';
 
 const { chains, publicClient } = configureChains(
-  [mainnet, polygon, sepolia, hardhat],
+  [mainnet, sepolia, hardhat],
   [
     infuraProvider({ apiKey: process.env.NEXT_PUBLIC_SEPOLIA_URL_INFURA }),
     publicProvider(),

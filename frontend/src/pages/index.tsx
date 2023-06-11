@@ -15,6 +15,7 @@ import {
   usePrepareContractWrite,
   useContractWrite,
   Address,
+  useWaitForTransaction,
   // useContract,
   // Address,
 } from 'wagmi';
@@ -27,6 +28,8 @@ import { useBuyTokens } from '@/hooks/useBuyTokens';
 import { useApproveTokens } from '@/hooks/useApproveTokens';
 import { useEnterRaffle } from '@/hooks/useEnterRaffle';
 import { usePickWinner } from '@/hooks/usePickWinner';
+import { useUserTokenBalance } from '@/hooks/useUserTokenBalance';
+import { useUserTokenBalances } from '@/hooks/useAllUserBalances';
 // import { GetServerSideProps } from 'next';
 // import { getTokenAllowanceOperation } from '@moralisweb3/common-evm-utils';0n
 
@@ -48,28 +51,34 @@ export default function App() {
     address,
   });
 
+  const { data = [] } = useUserTokenBalances();
+  const [balanceOf, allowance, playerBalance] = data;
+  console.log(playerBalance);
+
   const raffleBalance = useBalance({
     address: raffleAddress,
     enabled: false,
   });
 
-  const raffleTokenUserBalance = useBalance({
-    address: address,
-    token: raffleTokenAddress,
-    enabled: false,
-  });
+  const raffleUserTokenBalance = useUserTokenBalance();
 
   const { buyRaffleTokensSuccess, buyRaffleTokens } = useBuyTokens();
-  const { approveTokensSuccess, approveTokens } = useApproveTokens();
-  const { enterRaffleSuccess, enterRaffle, refetchPrepareConfigEnterRaffle } =
-    useEnterRaffle();
-  const { pickAWinnerSuccess, pickWinner, refetchPrepareConfigPickWinner } =
-    usePickWinner();
+  const { txApproveTokensSuccess, approveTokens, approveTokensData } =
+    useApproveTokens();
+  const { enterRaffleSuccess, enterRaffle } = useEnterRaffle();
+  // const { pickAWinnerSuccess, pickWinner, refetchPrepareConfigPickWinner } =
+  //   usePickWinner();
+
+  console.log('raffleTokenUserAddressBalance', raffleTokenUserAddressBalance);
+  console.log(
+    'raffleTokenUserAddressBalance',
+    raffleTokenUserAddressBalance > 0n,
+  );
 
   useEffect(() => {
     (async () => {
       if (raffleTokenAddress || buyRaffleTokensSuccess) {
-        const balance = await raffleTokenUserBalance.refetch();
+        const balance = await raffleUserTokenBalance.refetch();
         const val = getAccountBalance(balance);
         setRaffleTokenUserAddressBalance(val);
       }
@@ -90,9 +99,19 @@ export default function App() {
     raffleAddress,
     raffleBalance,
     raffleTokenAddress,
-    raffleTokenUserBalance,
+    raffleUserTokenBalance,
     userAccountBalance,
   ]);
+
+  useEffect(() => {
+    if (txApproveTokensSuccess) {
+      (async () => {
+        if (enterRaffle) {
+          await enterRaffle();
+        }
+      })();
+    }
+  }, [enterRaffle, txApproveTokensSuccess]);
 
   return (
     <>
@@ -138,15 +157,6 @@ export default function App() {
           >
             Buy Raffle Token <span className={'italic'}>(0.1 eth)</span>
           </Button>
-          {/*<Button*/}
-          {/*  disabled={!approveTokens}*/}
-          {/*  onClick={async () => {*/}
-          {/*    await approveTokens?.();*/}
-          {/*    //await refetchPrepareConfigEnterRaffle?.();*/}
-          {/*  }}*/}
-          {/*>*/}
-          {/*  Approve Raffle Token <span className={'italic'}>(0.1 eth)</span>*/}
-          {/*</Button>*/}
           <p>
             You have{' '}
             <span className={'text-2xl text-red-500'}>
@@ -169,24 +179,32 @@ export default function App() {
           <p> Countdown to draw.</p>
           <Button
             classOverrides={'self-start'}
-            disabled={!approveTokens}
+            disabled={!approveTokens || raffleTokenUserAddressBalance === 0n}
             onClick={async () => {
               await approveTokens?.();
-              // await refetchPrepareConfigEnterRaffle?.();
-              // enterRaffle?.();
             }}
           >
             Enter <span className={'italic'}>1</span> token into the Raffle
           </Button>
         </div>
+        <p>
+          You have entered
+          <span className={'text-2xl text-red-500'}>
+            {formatUnits(
+              playerBalance && playerBalance.result ? playerBalance.result : 0n,
+              0,
+            )}
+          </span>{' '}
+          tokens into the raffle.
+        </p>
 
-        <Button
-          classOverrides={'w-2/3 h-fit self-center'}
-          disabled={!pickWinner}
-          onClick={() => pickWinner?.()}
-        >
-          Pick a winner
-        </Button>
+        {/*<Button*/}
+        {/*  classOverrides={'w-2/3 h-fit self-center'}*/}
+        {/*  disabled={!pickWinner}*/}
+        {/*  onClick={() => pickWinner?.()}*/}
+        {/*>*/}
+        {/*  Pick a winner*/}
+        {/*</Button>*/}
         <Right title={'Stats'}>
           <p
             className={
