@@ -1,8 +1,12 @@
 import { useEffect, useState } from 'react';
+import { getAccount, readContracts } from '@wagmi/core';
 import { parseUnits, formatUnits, parseEther } from 'viem';
 // import { useEvmNativeBalance } from '@moralisweb3/next';
 import { Inter } from 'next/font/google';
-
+import { raffleAbi } from '@/abis';
+import { raffleTokenAbi } from '@/abis';
+import { contractAddresses } from '@/abis';
+import { getNetwork } from '@wagmi/core';
 import { Button } from '@/common/Button';
 
 import { ConnectKitButton } from 'connectkit';
@@ -16,6 +20,7 @@ import {
   useContractWrite,
   Address,
   useWaitForTransaction,
+  useContractReads,
   // useContract,
   // Address,
 } from 'wagmi';
@@ -30,12 +35,23 @@ import { useEnterRaffle } from '@/hooks/useEnterRaffle';
 import { usePickWinner } from '@/hooks/usePickWinner';
 import { useUserTokenBalance } from '@/hooks/useUserTokenBalance';
 import { useUserTokenBalances } from '@/hooks/useAllUserBalances';
+import { GetServerSideProps } from 'next';
 // import { GetServerSideProps } from 'next';
 // import { getTokenAllowanceOperation } from '@moralisweb3/common-evm-utils';0n
 
 const inter = Inter({ subsets: ['latin'] });
 
-export default function App() {
+interface IAppProps {
+  balanceOf: string;
+  allowance: string;
+  playerBalance: string;
+}
+
+export default function App({
+  balanceOf,
+  allowance,
+  playerBalance,
+}: IAppProps) {
   const [raffleAddressBalance, setRaffleAddressBalance] = useState<bigint>(0n);
   const [raffleTokenUserAddressBalance, setRaffleTokenUserAddressBalance] =
     useState<bigint>(0n);
@@ -51,9 +67,9 @@ export default function App() {
     address,
   });
 
-  const { data = [] } = useUserTokenBalances();
-  const [balanceOf, allowance, playerBalance] = data;
-  console.log(playerBalance);
+  // const { data = [] } = useUserTokenBalances();
+  // const [balanceOf, allowance, playerBalance] = data;
+  // console.log(playerBalance);
 
   const raffleBalance = useBalance({
     address: raffleAddress,
@@ -191,7 +207,7 @@ export default function App() {
           You have entered
           <span className={'text-2xl text-red-500'}>
             {formatUnits(
-              playerBalance && playerBalance.result ? playerBalance.result : 0n,
+                BigInt(playerBalance),
               0,
             )}
           </span>{' '}
@@ -224,15 +240,52 @@ export default function App() {
   );
 }
 
-// export const getServerSideProps: GetServerSideProps = async (context) => {
-//   const account = await getAccount();
-//   const balance = await fetchBalance({
-//     address: account?.address as Address,
-//   });
-//
-//   return {
-//     props: {
-//       initialAccountBalance: balance.value.toString(),
-//     },
-//   };
-// };
+export const getServerSideProps: GetServerSideProps = async (context) => {
+  const chain = 31337;
+  // TODO: get the chainId from getNetwork
+  //const { chain = 31337, chains } = getNetwork()
+
+  console.log(context);
+  const { address = '0x70997970C51812dc3A010C7d01b50e0d17dc79C8' } =
+    await getAccount();
+  const [raffleAddress, raffleTokenAddress] = contractAddresses[chain];
+
+  const raffleContract = {
+    address: raffleAddress,
+    abi: raffleAbi,
+    chainId: chain,
+  };
+  const raffleTokenContract = {
+    address: raffleTokenAddress,
+    abi: raffleTokenAbi,
+    chainId: chain,
+  };
+
+  const [balanceOf, allowance, playerBalance] = await readContracts({
+    contracts: [
+      {
+        ...raffleTokenContract,
+        functionName: 'balanceOf',
+        args: [address],
+      },
+      {
+        ...raffleTokenContract,
+        functionName: 'allowance',
+        args: [address, raffleAddress],
+      },
+      {
+        ...raffleContract,
+        functionName: 'getPlayerBalance',
+        args: [address],
+      },
+    ],
+  });
+
+  return {
+    props: {
+      balanceOf: balanceOf?.result?.toString(),
+      allowance: allowance?.result?.toString(),
+      playerBalance: playerBalance?.result?.toString(),
+    },
+  };
+};
