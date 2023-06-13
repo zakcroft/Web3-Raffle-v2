@@ -1,41 +1,24 @@
 import { useEffect, useState } from 'react';
 import { getAccount, readContracts } from '@wagmi/core';
-import { parseUnits, formatUnits, parseEther } from 'viem';
-// import { useEvmNativeBalance } from '@moralisweb3/next';
+import { formatUnits } from 'viem';
 import { Inter } from 'next/font/google';
 import { raffleAbi } from '@/abis';
 import { raffleTokenAbi } from '@/abis';
 import { contractAddresses } from '@/abis';
-import { getNetwork } from '@wagmi/core';
+
 import { Button } from '@/common/Button';
-
-import { ConnectKitButton } from 'connectkit';
-// import { fetchBalance, getAccount } from '@wagmi/core';
-import {
-  useAccount,
-  useBalance,
-  // useNetwork,
-  // useContractReads,
-  usePrepareContractWrite,
-  useContractWrite,
-  Address,
-  useWaitForTransaction,
-  useContractReads,
-  // useContract,
-  // Address,
-} from 'wagmi';
-
+import { useAccount, useBalance } from 'wagmi';
 import { useRaffle } from '@/hooks/useRaffle';
-
 import { Left, Main, Right } from '@/common/Layouts';
 import { getAccountBalance } from '@/utils';
 import { useBuyTokens } from '@/hooks/useBuyTokens';
 import { useApproveTokens } from '@/hooks/useApproveTokens';
 import { useEnterRaffle } from '@/hooks/useEnterRaffle';
-import { usePickWinner } from '@/hooks/usePickWinner';
 import { useUserTokenBalance } from '@/hooks/useUserTokenBalance';
-import { useUserTokenBalances } from '@/hooks/useAllUserBalances';
 import { GetServerSideProps } from 'next';
+import Header from '@/components/Header';
+import SideBar from '@/components/SideBar';
+import Stats from '@/components/Stats';
 // import { GetServerSideProps } from 'next';
 // import { getTokenAllowanceOperation } from '@moralisweb3/common-evm-utils';0n
 
@@ -55,21 +38,16 @@ export default function App({
   const [raffleAddressBalance, setRaffleAddressBalance] = useState<bigint>(0n);
   const [raffleTokenUserAddressBalance, setRaffleTokenUserAddressBalance] =
     useState<bigint>(0n);
-  const [fetchedAccountBalance, setFetchedAccountBalance] =
-    useState<bigint>(0n);
+  const [userWalletBalance, setUserWalletBalance] = useState<bigint>(0n);
 
   const { raffleAbi, raffleAddress, raffleTokenAbi, raffleTokenAddress } =
     useRaffle();
 
   const { address } = useAccount();
 
-  const userAccountBalance = useBalance({
+  const userWalletAccountBalance = useBalance({
     address,
   });
-
-  // const { data = [] } = useUserTokenBalances();
-  // const [balanceOf, allowance, playerBalance] = data;
-  // console.log(playerBalance);
 
   const raffleBalance = useBalance({
     address: raffleAddress,
@@ -85,12 +63,6 @@ export default function App({
   // const { pickAWinnerSuccess, pickWinner, refetchPrepareConfigPickWinner } =
   //   usePickWinner();
 
-  console.log('raffleTokenUserAddressBalance', raffleTokenUserAddressBalance);
-  console.log(
-    'raffleTokenUserAddressBalance',
-    raffleTokenUserAddressBalance > 0n,
-  );
-
   useEffect(() => {
     (async () => {
       if (raffleTokenAddress || buyRaffleTokensSuccess) {
@@ -104,9 +76,9 @@ export default function App({
         setRaffleAddressBalance(val);
       }
       if (address || buyRaffleTokensSuccess) {
-        const balance = await userAccountBalance.refetch();
+        const balance = await userWalletAccountBalance.refetch();
         const val = getAccountBalance(balance);
-        setFetchedAccountBalance(val);
+        setUserWalletBalance(val);
       }
     })();
   }, [
@@ -116,7 +88,7 @@ export default function App({
     raffleBalance,
     raffleTokenAddress,
     raffleUserTokenBalance,
-    userAccountBalance,
+    userWalletAccountBalance,
   ]);
 
   useEffect(() => {
@@ -131,88 +103,40 @@ export default function App({
 
   return (
     <>
-      <header
-        className={'grid grid-cols-3 pt-8 px-12 pb-2 border-b border-gray-500'}
-      >
-        <div className={'flex flex-col items-center col-start-2'}>
-          <h3 className={'text-2xl font-black'}>DECENTRALIZED RAFFLE</h3>
-          <h3 className={'text-sm text-gray-500 italic'}>
-            Address : {raffleAddress}
-          </h3>
-          <h1
-            className={
-              'inline-block text-3xl font-black text-white lg:leading-[5.625rem] '
-            }
-          >
-            Jackpot: {formatUnits(raffleAddressBalance, 18)} ETH
-          </h1>
-        </div>
-        <div className={'justify-self-end flex flex-col'}>
-          <ConnectKitButton />
-          <h1
-            className={
-              'inline-block text-normal font-black text-gray-300 italic mt-3'
-            }
-          >
-            Wallet balance:{' '}
-            {Number(formatUnits(fetchedAccountBalance, 18)).toFixed(2)}
-          </h1>
-        </div>
-      </header>
-
+      <Header
+        raffleAddressBalance={raffleAddressBalance}
+        userWalletBalance={userWalletBalance}
+      />
       <Main>
-        <Left
-          title={'Reserve'}
-          description={'Buy tokens to top up your reserve.'}
-        >
+        <SideBar
+          setRaffleTokenUserAddressBalance={setRaffleTokenUserAddressBalance}
+          raffleTokenUserAddressBalance={raffleTokenUserAddressBalance}
+        />
+        <div className={'flex flex-col basis-7/12 items-center px-20 pt-10'}>
+          <p>Welcome to the Decentralized Raffle play area.</p>
+          {raffleTokenUserAddressBalance === 0n && (
+            <p className={'mt-10 text-red-500'}>
+              You need to buy tokens to enter.
+            </p>
+          )}
           <Button
-            disabled={!buyRaffleTokens}
-            onClick={async () => {
-              await buyRaffleTokens?.();
-            }}
-          >
-            Buy Raffle Token <span className={'italic'}>(0.1 eth)</span>
-          </Button>
-          <p>
-            You have{' '}
-            <span className={'text-2xl text-red-500'}>
-              {formatUnits(raffleTokenUserAddressBalance, 0)}
-            </span>{' '}
-            tokens in your reserve.
-          </p>
-          <p>These are not entered into the draw yet.</p>
-          <p>Enter tokens in the play area.</p>
-          <p className={'inline-block text-xl font-black text-white  mt-20 '}>
-            Your Winning history{' '}
-          </p>
-          <ul className={'text-sm  text-gray-500 italic'}>
-            <li>New Date.</li>
-            <li>New Date.</li>
-          </ul>
-        </Left>
-        <div className={'flex flex-col basis-7/12 items-center p-20'}>
-          Welcome to the Decentralized Raffle play area.
-          <p> Countdown to draw.</p>
-          <Button
-            classOverrides={'self-start'}
+            classOverrides={'mt-10'}
             disabled={!approveTokens || raffleTokenUserAddressBalance === 0n}
             onClick={async () => {
               await approveTokens?.();
             }}
           >
-            Enter <span className={'italic'}>1</span> token into the Raffle
+            Approve and Enter <span className={'italic'}>1</span> token into the
+            Raffle
           </Button>
+          <p className={'mt-10'}>
+            You have entered{' '}
+            <span className={'text-3xl text-red-500'}>
+              {formatUnits(BigInt(playerBalance), 0)}
+            </span>{' '}
+            tokens into the raffle.
+          </p>
         </div>
-        <p>
-          You have entered
-          <span className={'text-2xl text-red-500'}>
-            {formatUnits(
-                BigInt(playerBalance),
-              0,
-            )}
-          </span>{' '}
-          tokens into the raffle.
-        </p>
 
         {/*<Button*/}
         {/*  classOverrides={'w-2/3 h-fit self-center'}*/}
@@ -221,20 +145,7 @@ export default function App({
         {/*>*/}
         {/*  Pick a winner*/}
         {/*</Button>*/}
-        <Right title={'Stats'}>
-          <p
-            className={
-              'inline-block text-xl font-black text-white pt-8 border-b border-dashed border-gray-500'
-            }
-          >
-            Winner history{' '}
-          </p>
-          <ul className={'text-sm text-gray-500 italic'}>
-            <li>0x1234567890</li>
-            <li>0x1234567890</li>
-            <li>0x1234567890</li>
-          </ul>
-        </Right>
+        <Stats />
       </Main>
     </>
   );
