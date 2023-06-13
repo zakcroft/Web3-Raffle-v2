@@ -19,22 +19,13 @@ import { GetServerSideProps } from 'next';
 import Header from '@/components/Header';
 import SideBar from '@/components/SideBar';
 import Stats from '@/components/Stats';
+import { useUserTokenBalances } from '@/hooks/useAllUserBalances';
 // import { GetServerSideProps } from 'next';
 // import { getTokenAllowanceOperation } from '@moralisweb3/common-evm-utils';0n
 
 const inter = Inter({ subsets: ['latin'] });
 
-interface IAppProps {
-  balanceOf: string;
-  allowance: string;
-  playerBalance: string;
-}
-
-export default function App({
-  balanceOf,
-  allowance,
-  playerBalance,
-}: IAppProps) {
+export default function App() {
   const [raffleAddressBalance, setRaffleAddressBalance] = useState<bigint>(0n);
   const [raffleTokenUserAddressBalance, setRaffleTokenUserAddressBalance] =
     useState<bigint>(0n);
@@ -55,6 +46,8 @@ export default function App({
   });
 
   const raffleUserTokenBalance = useUserTokenBalance();
+  const { balanceOf, allowance, playerBalance } = useUserTokenBalances();
+  // console.log(raffleUserTokenBalances);
 
   const { buyRaffleTokensSuccess, buyRaffleTokens } = useBuyTokens();
   const { txApproveTokensSuccess, approveTokens, approveTokensData } =
@@ -119,6 +112,13 @@ export default function App({
               You need to buy tokens to enter.
             </p>
           )}
+          <p className={'mt-10'}>
+            You have
+            <span className={'text-3xl text-red-500'}>
+              {formatUnits(allowance, 0)}
+            </span>{' '}
+            tokens approved.
+          </p>
           <Button
             classOverrides={'mt-10'}
             disabled={!approveTokens || raffleTokenUserAddressBalance === 0n}
@@ -132,7 +132,7 @@ export default function App({
           <p className={'mt-10'}>
             You have entered{' '}
             <span className={'text-3xl text-red-500'}>
-              {formatUnits(BigInt(playerBalance), 0)}
+              {formatUnits(playerBalance, 0)}
             </span>{' '}
             tokens into the raffle.
           </p>

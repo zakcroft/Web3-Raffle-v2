@@ -16,7 +16,11 @@ export const useUserTokenBalances = () => {
     abi: raffleTokenAbi,
   };
 
-  const { data, isError, isLoading } = useContractReads({
+  const {
+    data = [],
+    isError,
+    isLoading,
+  } = useContractReads({
     contracts: [
       {
         ...raffleTokenContract,
@@ -36,5 +40,13 @@ export const useUserTokenBalances = () => {
     ],
   });
 
-  return { data, isError, isLoading };
+  console.log(data);
+
+  const [balanceOfRes, allowanceRes, playerBalanceRes] = data;
+
+  const balanceOf = balanceOfRes?.result || 0n;
+  const allowance = allowanceRes?.result || 0n;
+  const playerBalance = playerBalanceRes?.result || 0n;
+
+  return { balanceOf, allowance, playerBalance, isError, isLoading };
 };

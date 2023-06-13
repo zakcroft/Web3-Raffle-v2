@@ -3,10 +3,13 @@ import { ConnectKitButton } from 'connectkit';
 import { useRaffle } from '@/hooks/useRaffle';
 import { NextPage } from 'next';
 
-const Header: NextPage<{
+const Header = ({
+  raffleAddressBalance,
+  userWalletBalance,
+}: {
   raffleAddressBalance: bigint;
   userWalletBalance: bigint;
-}> = ({ raffleAddressBalance, userWalletBalance }) => {
+}) => {
   const { raffleAddress } = useRaffle();
   return (
     <header
