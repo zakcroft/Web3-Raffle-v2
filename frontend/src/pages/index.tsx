@@ -1,29 +1,20 @@
 import { useEffect, useState } from 'react';
-import { getAccount, readContracts } from '@wagmi/core';
 import { formatUnits } from 'viem';
-import { Inter } from 'next/font/google';
-import { raffleAbi } from '@/abis';
-import { raffleTokenAbi } from '@/abis';
-import { contractAddresses } from '@/abis';
 
 import { Button } from '@/common/Button';
 import { useAccount, useBalance } from 'wagmi';
 import { useRaffle } from '@/hooks/useRaffle';
-import { Left, Main, Right } from '@/common/Layouts';
+import { Main } from '@/common/Layouts';
 import { getAccountBalance } from '@/utils';
 import { useBuyTokens } from '@/hooks/useBuyTokens';
 import { useApproveTokens } from '@/hooks/useApproveTokens';
 import { useEnterRaffle } from '@/hooks/useEnterRaffle';
 import { useUserTokenBalance } from '@/hooks/useUserTokenBalance';
-import { GetServerSideProps } from 'next';
+
 import Header from '@/components/Header';
 import SideBar from '@/components/SideBar';
 import Stats from '@/components/Stats';
 import { useUserTokenBalances } from '@/hooks/useAllUserBalances';
-// import { GetServerSideProps } from 'next';
-// import { getTokenAllowanceOperation } from '@moralisweb3/common-evm-utils';0n
-
-const inter = Inter({ subsets: ['latin'] });
 
 export default function App() {
   const [raffleAddressBalance, setRaffleAddressBalance] = useState<bigint>(0n);
@@ -46,8 +37,11 @@ export default function App() {
   });
 
   const raffleUserTokenBalance = useUserTokenBalance();
-  const { balanceOf, allowance, playerBalance } = useUserTokenBalances();
-  // console.log(raffleUserTokenBalances);
+  const {
+    allowance,
+    playerBalance,
+    userTokenBalancesRefetch
+  } = useUserTokenBalances();
 
   const { buyRaffleTokensSuccess, buyRaffleTokens } = useBuyTokens();
   const { txApproveTokensSuccess, approveTokens, approveTokensData } =
@@ -73,6 +67,9 @@ export default function App() {
         const val = getAccountBalance(balance);
         setUserWalletBalance(val);
       }
+      if (txApproveTokensSuccess || buyRaffleTokensSuccess) {
+        await userTokenBalancesRefetch();
+      }
     })();
   }, [
     address,
@@ -81,9 +78,10 @@ export default function App() {
     raffleBalance,
     raffleTokenAddress,
     raffleUserTokenBalance,
+    txApproveTokensSuccess,
+    userTokenBalancesRefetch,
     userWalletAccountBalance,
   ]);
-
   useEffect(() => {
     if (txApproveTokensSuccess) {
       (async () => {
@@ -113,7 +111,7 @@ export default function App() {
             </p>
           )}
           <p className={'mt-10'}>
-            You have
+            You have{' '}
             <span className={'text-3xl text-red-500'}>
               {formatUnits(allowance, 0)}
             </span>{' '}
@@ -150,53 +148,3 @@ export default function App() {
     </>
   );
 }
-
-export const getServerSideProps: GetServerSideProps = async (context) => {
-  const chain = 31337;
-  // TODO: get the chainId from getNetwork
-  //const { chain = 31337, chains } = getNetwork()
-
-  console.log(context);
-  const { address = '0x70997970C51812dc3A010C7d01b50e0d17dc79C8' } =
-    await getAccount();
-  const [raffleAddress, raffleTokenAddress] = contractAddresses[chain];
-
-  const raffleContract = {
-    address: raffleAddress,
-    abi: raffleAbi,
-    chainId: chain,
-  };
-  const raffleTokenContract = {
-    address: raffleTokenAddress,
-    abi: raffleTokenAbi,
-    chainId: chain,
-  };
-
-  const [balanceOf, allowance, playerBalance] = await readContracts({
-    contracts: [
-      {
-        ...raffleTokenContract,
-        functionName: 'balanceOf',
-        args: [address],
-      },
-      {
-        ...raffleTokenContract,
-        functionName: 'allowance',
-        args: [address, raffleAddress],
-      },
-      {
-        ...raffleContract,
-        functionName: 'getPlayerBalance',
-        args: [address],
-      },
-    ],
-  });
-
-  return {
-    props: {
-      balanceOf: balanceOf?.result?.toString(),
-      allowance: allowance?.result?.toString(),
-      playerBalance: playerBalance?.result?.toString(),
-    },
-  };
-};

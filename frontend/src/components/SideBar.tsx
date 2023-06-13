@@ -51,8 +51,8 @@ const SideBar = ({
         Your Winning history{' '}
       </p>
       <ul className={'text-sm  text-gray-500 italic'}>
-        <li>New Date.</li>
-        <li>New Date.</li>
+        <li className={'italic'}>TODO</li>
+        <li className={'italic'}>TODO</li>
       </ul>
     </Left>
   );
