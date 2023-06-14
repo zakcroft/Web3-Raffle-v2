@@ -51,13 +51,18 @@ export const useUserTokenBalances = () => {
     }
   }, [data, isSuccess]);
 
-  console.log(data);
-
   const [balanceOfRes, allowanceRes, playerBalanceRes] = dataRes;
 
   const balanceOf = balanceOfRes?.result || 0n;
   const allowance = allowanceRes?.result || 0n;
   const playerBalance = playerBalanceRes?.result || 0n;
 
-  return { balanceOf, allowance, playerBalance, isError, isLoading, userTokenBalancesRefetch:refetch };
+  return {
+    balanceOf,
+    allowance,
+    playerBalance,
+    isError,
+    isLoading,
+    userTokenBalancesRefetch: refetch,
+  };
 };

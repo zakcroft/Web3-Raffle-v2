@@ -37,16 +37,13 @@ export default function App() {
   });
 
   const raffleUserTokenBalance = useUserTokenBalance();
-  const {
-    allowance,
-    playerBalance,
-    userTokenBalancesRefetch
-  } = useUserTokenBalances();
+  const { allowance, playerBalance, userTokenBalancesRefetch } =
+    useUserTokenBalances();
 
   const { buyRaffleTokensSuccess, buyRaffleTokens } = useBuyTokens();
   const { txApproveTokensSuccess, approveTokens, approveTokensData } =
     useApproveTokens();
-  const { enterRaffleSuccess, enterRaffle } = useEnterRaffle();
+  const { enterRaffleSuccess, enterRaffle, refetchEnterRaffle } = useEnterRaffle();
   // const { pickAWinnerSuccess, pickWinner, refetchPrepareConfigPickWinner } =
   //   usePickWinner();
 
@@ -82,15 +79,19 @@ export default function App() {
     userTokenBalancesRefetch,
     userWalletAccountBalance,
   ]);
+
   useEffect(() => {
     if (txApproveTokensSuccess) {
       (async () => {
+        if (!enterRaffle) {
+          await refetchEnterRaffle();
+        }
         if (enterRaffle) {
           await enterRaffle();
         }
       })();
     }
-  }, [enterRaffle, txApproveTokensSuccess]);
+  }, [enterRaffle, refetchEnterRaffle, txApproveTokensSuccess]);
 
   return (
     <>
@@ -117,6 +118,10 @@ export default function App() {
             </span>{' '}
             tokens approved.
           </p>
+          <p className={'italic text-gray-500'}>
+            When you approve tokens for the raffle to spend the amount you
+            approve overwrites the prev amount.
+          </p>
           <Button
             classOverrides={'mt-10'}
             disabled={!approveTokens || raffleTokenUserAddressBalance === 0n}
@@ -124,8 +129,7 @@ export default function App() {
               await approveTokens?.();
             }}
           >
-            Approve and Enter <span className={'italic'}>1</span> token into the
-            Raffle
+            Approve and Enter tokens into the Raffle
           </Button>
           <p className={'mt-10'}>
             You have entered{' '}

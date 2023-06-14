@@ -11,9 +11,9 @@ const Stats = () => {
         Winner history{' '}
       </p>
       <ul className={'text-sm text-gray-500 italic'}>
-          <li className={'italic'}>TODO</li>
-          <li className={'italic'}>TODO</li>
-          <li className={'italic'}>TODO</li>
+        <li className={'italic'}>TODO</li>
+        <li className={'italic'}>TODO</li>
+        <li className={'italic'}>TODO</li>
       </ul>
     </Right>
   );

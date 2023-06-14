@@ -205,6 +205,7 @@ contract Raffle is
         uint256 raffleTokensAmountToEnter
     ) external raffleIsOpen {
         // sent enough tokens to enter
+        console.log("ENTER RAFFLE", msg.sender, raffleTokensAmountToEnter);
 
         if (raffleTokensAmountToEnter < 1) {
         revert Raffle__MinimumOneTokenToEnter();
@@ -212,16 +213,21 @@ contract Raffle is
 
         // Check have bought some tokens
         uint256 playerBalance = token.balanceOf(msg.sender);
+        console.log("playerBalance", playerBalance);
+
         if (playerBalance <= 0) {
             revert Raffle__YouNeedToBuyMoreTokens();
         }
 
         // Check have approved the raffle contract to use there tokens
         uint256 allowance = token.allowance(msg.sender, address(this));
+        console.log("allowance", allowance);
         if (allowance < raffleTokensAmountToEnter) {
             revert Raffle__YouNeedToApproveRaffleTokens();
         }
-
+console.log("ENTER RAFFLE", msg.sender, raffleTokensAmountToEnter);
+console.log("playerBalance", playerBalance);
+console.log("allowance", allowance);
         // Enter raffle
         token.transferFrom(
             msg.sender,
